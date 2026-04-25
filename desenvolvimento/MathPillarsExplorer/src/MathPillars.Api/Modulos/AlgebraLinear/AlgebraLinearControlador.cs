@@ -2,13 +2,10 @@ using MathPillars.Comum.Contratos;
 using MathPillars.Comum.Primitivos;
 using MathPillars.Comum.Modulos.AlgebraLinear;
 using Microsoft.AspNetCore.Mvc;
+using MathPillars.Api.Compartilhado;
 
 namespace MathPillars.Api.Modulos.AlgebraLinear;
 
-/// <summary>
-/// Controlador responsavel por receber e rotear requisicoes do modulo de Algebra Linear.
-/// Expoe endpoints REST sincronos e SSE assincronos conforme o custo computacional de cada operacao.
-/// </summary>
 [ApiController]
 [Route("api/algebra-linear")]
 public class AlgebraLinearControlador : ControllerBase
@@ -50,11 +47,15 @@ public class AlgebraLinearControlador : ControllerBase
     }
 
     [HttpGet("svd/stream")]
-    public async IAsyncEnumerable<ResultadoSSE<ResultadoSVD>> GetDecomporSVDComStreaming(
+    public async Task GetDecomporSVDComStreaming(
         [FromQuery] int linhas,
         [FromQuery] int colunas,
         [FromQuery] string elementosJson)
     {
+        Response.Headers.Append("Content-Type", "text/event-stream");
+        Response.Headers.Append("Cache-Control", "no-cache");
+        Response.Headers.Append("Connection", "keep-alive");
+
         var elementos = System.Text.Json.JsonSerializer.Deserialize<double[]>(elementosJson)!;
         var elementosMatrix = new double[linhas][];
         for (var i = 0; i < linhas; i++)
@@ -69,7 +70,9 @@ public class AlgebraLinearControlador : ControllerBase
         var matriz = new Matriz(elementosMatrix);
 
         await foreach (var evento in _svdServico.DecomporComStreamingSSE(matriz))
-            yield return evento;
+        {
+            await SSEHelper.EscreverEventoAsync(Response, evento);
+        }
     }
 
     [HttpPost("autovetores")]

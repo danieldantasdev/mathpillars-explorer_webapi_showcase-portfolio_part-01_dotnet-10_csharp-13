@@ -1,9 +1,10 @@
-using MathPillars.Comum.Contratos; using MathPillars.Comum.Primitivos;
+using MathPillars.Comum.Contratos; 
+using MathPillars.Comum.Primitivos;
 using MathPillars.Comum.Modulos.CalculoMultivariavel;
 using Microsoft.AspNetCore.Mvc;
+using MathPillars.Api.Compartilhado;
 
 namespace MathPillars.Api.Modulos.CalculoMultivariavel;
-
 
 /// <summary>
 /// Controlador responsavel por receber e rotear requisicoes do modulo de Calculo Multivariavel.
@@ -29,14 +30,20 @@ public class CalculoControlador : ControllerBase
     }
 
     [HttpGet("loss-landscape/stream")]
-    public async IAsyncEnumerable<ResultadoSSE<PontoSuperficie3D[]>> GetGerarLossLandscapeComStreaming(
+    public async Task GetGerarLossLandscapeComStreaming(
         [FromQuery] string funcaoNome,
         [FromQuery] double minX,
         [FromQuery] double maxX,
         [FromQuery] double minY,
         [FromQuery] double maxY)
     {
+        Response.Headers.Append("Content-Type", "text/event-stream");
+        Response.Headers.Append("Cache-Control", "no-cache");
+        Response.Headers.Append("Connection", "keep-alive");
+
         await foreach (var evento in _lossLandscapeServico.GerarSuperficieComStreamingSSE(funcaoNome, minX, maxX, minY, maxY))
-            yield return evento;
+        {
+            await SSEHelper.EscreverEventoAsync(Response, evento);
+        }
     }
 }
