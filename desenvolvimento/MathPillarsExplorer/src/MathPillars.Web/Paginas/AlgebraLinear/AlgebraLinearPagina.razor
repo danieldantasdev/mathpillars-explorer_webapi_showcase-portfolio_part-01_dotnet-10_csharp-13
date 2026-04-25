@@ -62,6 +62,13 @@
                     <div class="resultado-box-verde"><h6>Matriz Σ</h6><h3>@resultadoSVD.MatrizSigma.Linhas x @resultadoSVD.MatrizSigma.Colunas</h3></div>
                     <div class="resultado-box-verde"><h6>Matriz Vᵀ</h6><h3>@resultadoSVD.MatrizVTransposta.Linhas x @resultadoSVD.MatrizVTransposta.Colunas</h3></div>
                 </div>
+
+                <div class="cartao-premium" style="background-color: var(--cor-primaria-suave); border: none; margin-top: 1.5rem;">
+                    <h6 style="margin-bottom: 0.5rem; color: var(--cor-primaria); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Valores Singulares ($\sigma$)</h6>
+                    <p style="font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; font-weight: 600; color: var(--cor-texto-principal); margin-top: 0.5rem; margin-bottom: 0;">
+                        @string.Join(", ", resultadoSVD.ValoresSingulares.Select(v => v.ToString("F3")))
+                    </p>
+                </div>
             </div>
         }
     </div>
