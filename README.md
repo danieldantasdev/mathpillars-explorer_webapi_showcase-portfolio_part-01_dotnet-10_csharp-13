@@ -160,22 +160,39 @@ Em estrita conformidade com as especificações exigidas de governança de repos
 ### 6.1 C4 Model
 
 - **Contexto de Software (`14-c4-contexto.puml`)**: Documenta a interacao do usuario com o sistema, evidenciando as fronteiras entre o frontend, a API de calculo e os limites do sistema.
+  ![C4 Contexto](./analise/14-c4-contexto.png)
 - **Diagrama de Container (`15-c4-container.puml`)**: Expoe a divisao entre o cliente WebAssembly e o servidor ASP.NET Core, detalhando os protocolos de comunicacao (HTTP/SSE).
+  ![C4 Container](./analise/15-c4-container.png)
 - **Diagrama de Componente (`16-c4-componente.puml`)**: Subdivide os binarios em modulos logicos (Algebra, Calculo, Probabilidade), demonstrando como os servicos de calculo sao encapsulados.
+  ![C4 Componente](./analise/16-c4-componente.png)
 - **Diagrama de Codigo (`17-c4-codigo.puml`)**: Detalha as classes nucleares de processamento, como os servicos SSE e os tipos primitivos (Vetor, Matriz).
+  ![C4 Codigo](./analise/17-c4-codigo.png)
 
 ### 6.2 Unified Modeling Language (UML)
 
 - **Caso de Uso (`01-diagrama-caso-de-uso.puml`)**: Delimita as acoes disponiveis ao usuario, como a configuracao de experimentos matematicos e o monitoramento de resultados.
+  ![Caso de Uso](./analise/01-diagrama-caso-de-uso.png)
 - **Diagrama de Classes (`02-diagrama-classes.puml`)**: Mostra a hierarquia de tipos e as relacoes entre controladores, servicos de calculo e modelos de dados.
+  ![Classes](./analise/02-diagrama-classes.png)
 - **Diagrama de Sequencia (`03-diagrama-sequencia.puml`)**: Ilustra o fluxo temporal de uma solicitacao de calculo via SSE, desde o disparo no cliente ate a recepcao final dos dados.
+  ![Sequencia](./analise/03-diagrama-sequencia.png)
 - **Diagrama de Comunicacao (`04-diagrama-comunicacao.puml`)**: Foca na troca de mensagens entre os objetos do sistema para realizar uma decomposicao matematica.
+  ![Comunicacao](./analise/04-diagrama-comunicacao.png)
 - **Maquina de Estado (`05-diagrama-estados.puml`)**: Documenta os estados do processamento assincrono (Ocioso, Calculando, RecebendoDados, Concluido).
+  ![Estados](./analise/05-diagrama-estados.png)
 - **Diagrama de Atividade (`06-diagrama-atividade.puml`)**: Macro-fluxo processual do calculo de um experimento, incluindo validacoes de entrada e transformacoes de dados.
+  ![Atividade](./analise/06-diagrama-atividade.png)
 - **Componentes (`07-diagrama-componentes.puml`)**: Reforca a modularidade do sistema e as dependencias entre o motor matematico e a camada de visualizacao.
+  ![Componentes](./analise/07-diagrama-componentes.png)
 - **Implantacao (`08-diagrama-implantacao.puml`)**: Descreve como os artefatos (.dll, .wasm) sao distribuídos no ambiente de execucao.
+  ![Implantacao](./analise/08-diagrama-implantacao.png)
 - **Pacotes (`09-diagrama-pacotes.puml`)**: Demarca a divisao semantica do projeto em namespaces organizados por responsabilidade.
+  ![Pacotes](./analise/09-diagrama-pacotes.png)
 - **Objetos (`10-diagrama-objetos.puml`)**: Snapshot das instancias em memoria durante a execucao de um experimento de PCA.
+  ![Objetos](./analise/10-diagrama-objetos.png)
 - **Estrutura Composta (`11-diagrama-estrutura-composta.puml`)**: Detalha a composicao interna de modulos complexos, como o motor de otimizacao.
+  ![Estrutura Composta](./analise/11-diagrama-estrutura-composta.png)
 - **Temporizacao (`12-diagrama-temporizacao.puml`)**: Analisa a latencia e o comportamento temporal das atualizacoes de progresso via SSE.
+  ![Temporizacao](./analise/12-diagrama-temporizacao.png)
 - **Visao Geral de Interacao (`13-diagrama-visao-geral-interacao.puml`)**: Combina elementos de sequencia e atividade para fornecer uma visao holistica do sistema.
+  ![Visao Geral de Interacao](./analise/13-diagrama-visao-geral-interacao.png)
