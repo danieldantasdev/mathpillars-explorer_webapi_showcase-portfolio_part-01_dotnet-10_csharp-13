@@ -138,6 +138,8 @@ else if (ExperimentoAtivo == "Markov")
     private async Task CalcularBayes()
     {
         resultadoBayes = await Cliente.PostAsync<RequisicaoBayes, ResultadoBayes>("api/probabilidade/bayes", new(Prior, Verossimilhanca, FalsoPositivo));
+        await Task.Delay(100);
+        await JS.InvokeVoidAsync("renderizarMatematica");
     }
 
     private async Task GerarGaussiana()
@@ -154,11 +156,15 @@ else if (ExperimentoAtivo == "Markov")
     private async Task CalcularEntropia()
     {
         resultadoEntropia = await Cliente.PostAsync<dynamic, ResultadoEntropiaCruzada>("api/probabilidade/entropia-cruzada", new { });
+        await Task.Delay(100);
+        await JS.InvokeVoidAsync("renderizarMatematica");
     }
 
     private async Task SimularMarkov()
     {
         resultadoMarkov = await Cliente.PostAsync<dynamic, ResultadoMarkov>("api/probabilidade/markov", new { });
+        await Task.Delay(100);
+        await JS.InvokeVoidAsync("renderizarMatematica");
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

@@ -64,7 +64,7 @@
                 </div>
 
                 <div class="cartao-premium" style="background-color: var(--cor-primaria-suave); border: none; margin-top: 1.5rem;">
-                    <h6 style="margin-bottom: 0.5rem; color: var(--cor-primaria); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Valores Singulares ($\sigma$)</h6>
+                    <h6 style="margin-bottom: 0.5rem; color: var(--cor-primaria); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Valores Singulares ($\Sigma$)</h6>
                     <p style="font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; font-weight: 600; color: var(--cor-texto-principal); margin-top: 0.5rem; margin-bottom: 0;">
                         @string.Join(", ", resultadoSVD.ValoresSingulares.Select(v => v.ToString("F3")))
                     </p>
@@ -231,6 +231,8 @@ else if (ExperimentoAtivo == "Autovetores")
             StateHasChanged();
         }
         Calculando = false;
+        await Task.Delay(100);
+        await JS.InvokeVoidAsync("renderizarMatematica");
     }
 
     private async Task ExecutarPCA()
@@ -245,6 +247,8 @@ else if (ExperimentoAtivo == "Autovetores")
             StateHasChanged();
         }
         Calculando = false;
+        await Task.Delay(100);
+        await JS.InvokeVoidAsync("renderizarMatematica");
     }
 
     private async Task ExecutarSimilaridade()
@@ -252,6 +256,8 @@ else if (ExperimentoAtivo == "Autovetores")
         var vA = VetorATexto.Split(',').Select(double.Parse).ToArray();
         var vB = VetorBTexto.Split(',').Select(double.Parse).ToArray();
         resultadoSimilaridade = await Cliente.PostAsync<RequisicaoSimilaridade, Escalar>("api/algebra-linear/similaridade-cosseno", new(vA, vB));
+        await Task.Delay(100);
+        await JS.InvokeVoidAsync("renderizarMatematica");
     }
 
     private async Task ExecutarAutovetores()
@@ -264,6 +270,8 @@ else if (ExperimentoAtivo == "Autovetores")
             for(int j=0; j<n; j++) elementos[i][j] = (i*n+j < ElementosMatriz.Length) ? ElementosMatriz[i*n+j] : 0;
         }
         resultadoAutovetores = await Cliente.PostAsync<RequisicaoAutovetores, ResultadoAutovetores>("api/algebra-linear/autovetores", new(elementos, n));
+        await Task.Delay(100);
+        await JS.InvokeVoidAsync("renderizarMatematica");
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
