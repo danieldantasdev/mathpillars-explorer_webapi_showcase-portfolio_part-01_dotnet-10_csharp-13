@@ -64,29 +64,30 @@
             <h5 style="margin-bottom: 1.5rem;">Resultados da Decomposicao</h5>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
                 
-                <div class="cartao-premium" style="background-color: var(--cor-primaria-suave); border: none;">
-                    <h6 style="margin-bottom: 0.5rem; color: var(--cor-primaria);">Matriz $U$</h6>
-                    <p style="font-size: 0.8rem; color: var(--cor-texto-secundario); margin-bottom: 0.5rem;">Dimensoes: @Resultado.MatrizU.Linhas x @Resultado.MatrizU.Colunas</p>
-                    <p style="font-weight: 600; font-size: 0.75rem; font-family: 'JetBrains Mono', monospace;">Ortogonal (m x m)</p>
+                <div class="cartao-premium" style="background-color: var(--cor-sucesso); color: white; border: none;">
+                    <h6 style="margin-bottom: 0.5rem; opacity: 0.9;">Matriz $U$</h6>
+                    <h3 style="margin: 0;">@Resultado.MatrizU.Linhas x @Resultado.MatrizU.Colunas</h3>
+                    <p style="font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.8;">Ortogonal (m x m)</p>
                 </div>
 
-                <div class="cartao-premium" style="background-color: var(--cor-primaria-suave); border: none;">
-                    <h6 style="margin-bottom: 0.5rem; color: var(--cor-primaria);">Matriz $\Sigma$</h6>
-                    <p style="font-size: 0.8rem; color: var(--cor-texto-secundario); margin-bottom: 0.5rem;">Dimensoes: @Resultado.MatrizSigma.Linhas x @Resultado.MatrizSigma.Colunas</p>
-                    <p style="font-weight: 600; font-size: 0.75rem; font-family: 'JetBrains Mono', monospace;">Diagonal (m x n)</p>
+                <div class="cartao-premium" style="background-color: var(--cor-sucesso); color: white; border: none;">
+                    <h6 style="margin-bottom: 0.5rem; opacity: 0.9;">Matriz $\Sigma$</h6>
+                    <h3 style="margin: 0;">@Resultado.MatrizSigma.Linhas x @Resultado.MatrizSigma.Colunas</h3>
+                    <p style="font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.8;">Diagonal (m x n)</p>
                 </div>
 
-                <div class="cartao-premium" style="background-color: var(--cor-primaria-suave); border: none;">
-                    <h6 style="margin-bottom: 0.5rem; color: var(--cor-primaria);">Matriz $V^T$</h6>
-                    <p style="font-size: 0.8rem; color: var(--cor-texto-secundario); margin-bottom: 0.5rem;">Dimensoes: @Resultado.MatrizVTransposta.Linhas x @Resultado.MatrizVTransposta.Colunas</p>
-                    <p style="font-weight: 600; font-size: 0.75rem; font-family: 'JetBrains Mono', monospace;">Ortogonal (n x n)</p>
+                <div class="cartao-premium" style="background-color: var(--cor-sucesso); color: white; border: none;">
+                    <h6 style="margin-bottom: 0.5rem; opacity: 0.9;">Matriz $V^T$</h6>
+                    <h3 style="margin: 0;">@Resultado.MatrizVTransposta.Linhas x @Resultado.MatrizVTransposta.Colunas</h3>
+                    <p style="font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.8;">Ortogonal (n x n)</p>
                 </div>
 
                 <div class="cartao-premium" style="background-color: var(--cor-primaria-suave); border: none;">
                     <h6 style="margin-bottom: 0.5rem; color: var(--cor-primaria);">Valores Singulares ($\sigma$)</h6>
-                    <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; font-weight: 600;">
+                    <p style="font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; font-weight: 600; color: var(--cor-texto-principal); margin-top: 0.5rem;">
                         @string.Join(", ", Resultado.ValoresSingulares.Select(v => v.ToString("F3")))
                     </p>
+                    <p style="font-size: 0.75rem; margin-top: 0.5rem; color: var(--cor-texto-secundario);">Importancia de cada componente.</p>
                 </div>
 
             </div>
