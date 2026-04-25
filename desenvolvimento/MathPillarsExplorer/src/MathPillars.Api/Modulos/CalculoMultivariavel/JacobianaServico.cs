@@ -28,6 +28,6 @@ public class JacobianaServico
             pontoArray[j] = original;
         }
 
-        return new Matriz(jacobiana);
+        return Matriz.DeArrayBidimensional(jacobiana);
     }
 }

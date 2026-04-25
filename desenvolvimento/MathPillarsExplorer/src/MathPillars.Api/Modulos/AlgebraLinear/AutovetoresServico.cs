@@ -8,7 +8,7 @@ public class AutovetoresServico
 {
     public ResultadoAutovetores CalcularAutovetoresEAutovalores(Matriz matriz)
     {
-        var matrizMathNet = Matrix<double>.Build.DenseOfArray(matriz.Elementos);
+        var matrizMathNet = Matrix<double>.Build.DenseOfRowArrays(matriz.Elementos);
         var evd = matrizMathNet.Evd();
         
         var autovalores = evd.EigenValues.Select(c => c.Real).ToArray();

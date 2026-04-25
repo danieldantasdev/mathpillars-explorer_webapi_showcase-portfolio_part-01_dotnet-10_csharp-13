@@ -28,9 +28,11 @@ public class LeitorSSE
         using var fluxo = await resposta.Content.ReadAsStreamAsync(cancelamento);
         using var leitor = new StreamReader(fluxo);
 
-        while (!leitor.EndOfStream && !cancelamento.IsCancellationRequested)
+        while (!cancelamento.IsCancellationRequested)
         {
             var linha = await leitor.ReadLineAsync();
+            if (linha == null) break; // Fim do stream
+            
             if (string.IsNullOrWhiteSpace(linha)) continue;
 
             if (linha.StartsWith("data:"))

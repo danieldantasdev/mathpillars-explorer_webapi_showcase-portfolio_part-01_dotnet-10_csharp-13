@@ -31,7 +31,7 @@ public class SVDServico
         var matrizMathNet = Matrix<double>.Build.Dense(matriz.Linhas, matriz.Colunas);
         for (var linha = 0; linha < matriz.Linhas; linha++)
             for (var coluna = 0; coluna < matriz.Colunas; coluna++)
-                matrizMathNet[linha, coluna] = matriz.Elementos[linha, coluna];
+                matrizMathNet[linha, coluna] = matriz.Elementos[linha][coluna];
         return matrizMathNet;
     }
 
@@ -41,6 +41,6 @@ public class SVDServico
         for (var linha = 0; linha < matrizMathNet.RowCount; linha++)
             for (var coluna = 0; coluna < matrizMathNet.ColumnCount; coluna++)
                 elementos[linha, coluna] = matrizMathNet[linha, coluna];
-        return new Matriz(elementos);
+        return Matriz.DeArrayBidimensional(elementos);
     }
 }

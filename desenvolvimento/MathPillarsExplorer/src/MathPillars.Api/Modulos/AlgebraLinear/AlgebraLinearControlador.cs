@@ -1,9 +1,9 @@
-using MathPillars.Comum.Contratos; using MathPillars.Comum.Primitivos;
+using MathPillars.Comum.Contratos; 
+using MathPillars.Comum.Primitivos;
 using MathPillars.Comum.Modulos.AlgebraLinear;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MathPillars.Api.Modulos.AlgebraLinear;
-
 
 /// <summary>
 /// Controlador responsavel por receber e rotear requisicoes do modulo de Algebra Linear.
@@ -56,10 +56,15 @@ public class AlgebraLinearControlador : ControllerBase
         [FromQuery] string elementosJson)
     {
         var elementos = System.Text.Json.JsonSerializer.Deserialize<double[]>(elementosJson)!;
-        var elementosMatrix = new double[linhas, colunas];
+        var elementosMatrix = new double[linhas][];
         for (var i = 0; i < linhas; i++)
+        {
+            elementosMatrix[i] = new double[colunas];
             for (var j = 0; j < colunas; j++)
-                elementosMatrix[i, j] = elementos[i * colunas + j];
+            {
+                elementosMatrix[i][j] = elementos[i * colunas + j];
+            }
+        }
 
         var matriz = new Matriz(elementosMatrix);
 
