@@ -52,10 +52,16 @@
 
         @if (resultadoSVD != null)
         {
-            <div style="margin-top: 2rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
-                <div class="resultado-box-verde"><h6>Matriz U</h6><h3>@resultadoSVD.MatrizU.Linhas x @resultadoSVD.MatrizU.Colunas</h3></div>
-                <div class="resultado-box-verde"><h6>Matriz Σ</h6><h3>@resultadoSVD.MatrizSigma.Linhas x @resultadoSVD.MatrizSigma.Colunas</h3></div>
-                <div class="resultado-box-verde"><h6>Matriz Vᵀ</h6><h3>@resultadoSVD.MatrizVTransposta.Linhas x @resultadoSVD.MatrizVTransposta.Colunas</h3></div>
+            <div style="margin-top: 2rem;">
+                <div class="resultado-box-azul" style="margin-bottom: 1rem;">
+                    <h6>Dimensoes da Matriz Original A</h6>
+                    <h3>@NumLinhas x @NumColunas</h3>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
+                    <div class="resultado-box-verde"><h6>Matriz U</h6><h3>@resultadoSVD.MatrizU.Linhas x @resultadoSVD.MatrizU.Colunas</h3></div>
+                    <div class="resultado-box-verde"><h6>Matriz Σ</h6><h3>@resultadoSVD.MatrizSigma.Linhas x @resultadoSVD.MatrizSigma.Colunas</h3></div>
+                    <div class="resultado-box-verde"><h6>Matriz Vᵀ</h6><h3>@resultadoSVD.MatrizVTransposta.Linhas x @resultadoSVD.MatrizVTransposta.Colunas</h3></div>
+                </div>
             </div>
         }
     </div>
@@ -151,6 +157,9 @@ else if (ExperimentoAtivo == "Autovetores")
     .resultado-box-verde { background-color: var(--cor-sucesso); color: white; padding: 1.5rem; border-radius: 12px; }
     .resultado-box-verde h6 { margin: 0 0 0.5rem 0; opacity: 0.9; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
     .resultado-box-verde h3 { margin: 0; font-weight: 700; }
+    .resultado-box-azul { background-color: var(--cor-primaria); color: white; padding: 1.5rem; border-radius: 12px; }
+    .resultado-box-azul h6 { margin: 0 0 0.5rem 0; opacity: 0.9; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
+    .resultado-box-azul h3 { margin: 0; font-weight: 700; }
     .botao-secundario { background: transparent; border: 1px solid var(--cor-borda); padding: 0.6rem 1.2rem; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
     .botao-secundario:hover { background: var(--cor-primaria-suave); border-color: var(--cor-primaria); }
 </style>
