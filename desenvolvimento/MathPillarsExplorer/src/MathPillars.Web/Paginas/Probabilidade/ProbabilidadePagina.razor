@@ -3,31 +3,44 @@
 @inject ClienteMathCore Cliente
 @inject IJSRuntime JS
 
-<PageTitle>Probabilidade e Estatistica | MathPillars</PageTitle>
+<PageTitle>Probabilidade e Bayes | MathPillars</PageTitle>
 
-<h1 style="margin-bottom: 0.5rem;">Probabilidade e Estatistica</h1>
-<p style="color: var(--cor-texto-secundario); margin-bottom: 3rem;">Estudo da incerteza, teoria da informacao e distribuicoes de dados.</p>
+<h1 style="margin-bottom: 0.5rem;">Teoria da Probabilidade</h1>
+<p style="color: var(--cor-texto-secundario); margin-bottom: 3rem;">Inferencia Bayesiana e a atualizacao de crencas baseada em evidencias.</p>
 
 <PainelTeoria Titulo="Teorema de Bayes">
-    <p>O Teorema de Bayes descreve a probabilidade de um evento baseando-se no conhecimento previo de condicoes que podem estar relacionadas ao evento.</p>
+    <p>O Teorema de Bayes descreve a probabilidade de um evento, baseado em um conhecimento previo de condicoes que podem estar relacionadas ao evento.</p>
     <div class="formula-matematica" style="text-align: center;">
         $$P(H|E) = \frac{P(E|H) \cdot P(H)}{P(E)}$$
     </div>
-    <p style="margin-top: 1rem;">Onde $P(H|E)$ e a probabilidade posterior, $P(H)$ e a prior e $P(E|H)$ e a verossimilhanca.</p>
+    <p style="margin-top: 1rem;">Onde:</p>
+    <ul style="font-size: 0.9rem; color: var(--cor-texto-secundario);">
+        <li>$P(H|E)$: Posterior (Crenca atualizada)</li>
+        <li>$P(E|H)$: Verossimilhanca (Chance da evidencia dado a hipotese)</li>
+        <li>$P(H)$: Prior (Crenca inicial)</li>
+        <li>$P(E)$: Evidencia (Probabilidade total do dado observado)</li>
+    </ul>
 </PainelTeoria>
 
 <div class="cartao-premium">
-    <h4>Experimento: Atualizacao Bayesiana</h4>
-    <p style="font-size: 0.85rem; color: var(--cor-texto-secundario); margin: 1rem 0;">Calcule como novas evidencias alteram sua crenca previa em um modelo.</p>
+    <h4>Experimento: Inferencia Bayesiana Dinamica</h4>
+    <p style="font-size: 0.85rem; color: var(--cor-texto-secundario); margin: 1rem 0;">Simule a atualizacao de uma probabilidade (ex: teste medico ou filtro de spam).</p>
     
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
         <div>
-            <label style="display: block; font-size: 0.8rem; margin-bottom: 0.5rem;">Probabilidade Prior $P(H)$</label>
-            <input type="number" step="0.01" class="cartao-premium" style="width: 100%; padding: 0.5rem;" @bind="Prior" />
+            <label style="display: block; font-size: 0.8rem; margin-bottom: 0.5rem; font-weight: 600;">Probabilidade Prior $P(H)$</label>
+            <input type="number" step="0.01" min="0" max="1" @bind="Prior" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--cor-borda);" />
+            <p style="font-size: 0.7rem; color: var(--cor-texto-secundario); mt-1;">Sua crenca inicial antes do teste.</p>
         </div>
         <div>
-            <label style="display: block; font-size: 0.8rem; margin-bottom: 0.5rem;">Verossimilhanca $P(E|H)$</label>
-            <input type="number" step="0.01" class="cartao-premium" style="width: 100%; padding: 0.5rem;" @bind="Verossimilhanca" />
+            <label style="display: block; font-size: 0.8rem; margin-bottom: 0.5rem; font-weight: 600;">Verossimilhanca $P(E|H)$</label>
+            <input type="number" step="0.01" min="0" max="1" @bind="Verossimilhanca" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--cor-borda);" />
+            <p style="font-size: 0.7rem; color: var(--cor-texto-secundario); mt-1;">Sensibilidade do teste (Taxa de acerto).</p>
+        </div>
+        <div>
+            <label style="display: block; font-size: 0.8rem; margin-bottom: 0.5rem; font-weight: 600;">Falso Positivo $P(E|\neg H)$</label>
+            <input type="number" step="0.01" min="0" max="1" @bind="FalsoPositivo" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--cor-borda);" />
+            <p style="font-size: 0.7rem; color: var(--cor-texto-secundario); mt-1;">Probabilidade do teste dar positivo incorretamente.</p>
         </div>
     </div>
 
@@ -37,26 +50,47 @@
 
     @if (Resultado != null)
     {
-        <div style="margin-top: 2rem; padding: 1.5rem; background-color: var(--cor-sucesso); color: white; border-radius: 12px;">
-            <h5>Posterior Calculada: @Resultado.ProbabilidadePosterior.ToString("P2")</h5>
-            <p style="font-size: 0.8rem; margin-top: 0.5rem;">Evidencia total calculada: @Resultado.Evidencia.ToString("F4")</p>
+        <div style="margin-top: 2rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+            <div class="cartao-premium" style="background-color: var(--cor-sucesso); color: white; border: none;">
+                <h6 style="margin-bottom: 0.5rem; opacity: 0.9;">Probabilidade Posterior</h6>
+                <h3 style="margin: 0;">@Resultado.ProbabilidadePosterior.ToString("P2")</h3>
+                <p style="font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.8;">Crenca atualizada apos a evidencia.</p>
+            </div>
+            
+            <div class="cartao-premium" style="background-color: var(--cor-primaria-suave); border: none;">
+                <h6 style="margin-bottom: 0.5rem; color: var(--cor-primaria);">Evidencia Total $P(E)$</h6>
+                <h3 style="margin: 0; color: var(--cor-texto-principal);">@Resultado.Evidencia.ToString("F4")</h3>
+                <p style="font-size: 0.75rem; margin-top: 0.5rem; color: var(--cor-texto-secundario);">Fator de normalizacao do modelo.</p>
+            </div>
         </div>
     }
 </div>
 
 @code {
-    private double Prior = 0.1;
-    private double Verossimilhanca = 0.9;
+    private double Prior = 0.01;
+    private double Verossimilhanca = 0.99;
+    private double FalsoPositivo = 0.05;
     private ResultadoBayes? Resultado;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await JS.InvokeVoidAsync("renderizarMatematica");
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("renderizarMatematica");
+        }
     }
 
     private async Task CalcularBayes()
     {
-        var requisicao = new RequisicaoBayes(Prior, Verossimilhanca, 0.05);
-        Resultado = await Cliente.PostAsync<RequisicaoBayes, ResultadoBayes>("api/probabilidade/bayes", requisicao);
+        try 
+        {
+            var requisicao = new RequisicaoBayes(Prior, Verossimilhanca, FalsoPositivo);
+            Resultado = await Cliente.PostAsync<RequisicaoBayes, ResultadoBayes>("api/probabilidade/bayes", requisicao);
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Erro no calculo de Bayes: " + ex.Message);
+        }
     }
 }
