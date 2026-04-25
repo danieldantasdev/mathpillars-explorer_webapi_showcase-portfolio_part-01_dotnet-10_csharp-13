@@ -8,7 +8,11 @@ namespace MathPillars.Api.Compartilhado;
 /// </summary>
 public static class SSEHelper
 {
-    private static readonly JsonSerializerOptions OpcoesJson = new() { PropertyNameCaseInsensitive = true };
+    private static readonly JsonSerializerOptions OpcoesJson = new() 
+    { 
+        PropertyNameCaseInsensitive = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
 
     public static async Task EscreverEventoAsync<T>(HttpResponse resposta, T dado)
     {

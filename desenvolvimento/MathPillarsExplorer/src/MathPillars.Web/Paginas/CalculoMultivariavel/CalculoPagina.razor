@@ -28,11 +28,19 @@
 
     <ProgressoSSE Visivel="@Calculando" Percentual="@Progresso" Mensagem="@Mensagem" />
 
-    @if (Pontos != null)
+    <div id="grafico-loss-landscape" style="width: 100%; height: 500px; margin-top: 2rem; border-radius: 12px; overflow: hidden; background-color: var(--cor-primaria-suave);">
+        @if (Pontos == null && !Calculando)
+        {
+            <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--cor-texto-secundario);">
+                Aguardando geracao dos pontos...
+            </div>
+        }
+    </div>
+
+    @if (Pontos != null && !Calculando)
     {
-        <div style="margin-top: 2rem; padding: 1.5rem; background-color: var(--cor-primaria-suave); border-radius: 12px; text-align: center;">
-            <p><strong>Superficie gerada com @Pontos.Length pontos.</strong></p>
-            <p style="font-size: 0.8rem; color: var(--cor-secundaria); margin-top: 0.5rem;">Visualizacao 3D interativa via Plotly.js (Simulado)</p>
+        <div style="margin-top: 1rem; text-align: center;">
+            <p style="font-size: 0.8rem; color: var(--cor-secundaria);">Superficie de Rosenbrock gerada com @Pontos.Length pontos via SSE.</p>
         </div>
     }
 </div>
@@ -53,9 +61,10 @@
         Calculando = true;
         Pontos = null;
         Progresso = 0;
-        Mensagem = "Solicitando grade ao servidor...";
+        Mensagem = "Calculando topografia da superficie...";
+        StateHasChanged();
 
-        var url = "api/calculo/loss-landscape/stream?funcaoNome=RosenbrockBidimensional&minX=-2&maxX=2&minY=-1&maxY=3";
+        var url = "api/calculo/loss-landscape/stream?funcaoNome=rosenbrock&minX=-2&maxX=2&minY=-1&maxY=3";
 
         try
         {
@@ -67,6 +76,9 @@
                 if (evento.Concluido && evento.DadosParciais != null)
                 {
                     Pontos = evento.DadosParciais;
+                    StateHasChanged();
+                    await Task.Delay(100); // Pequeno delay para garantir o render do DOM
+                    await JS.InvokeVoidAsync("renderizarGrafico3D", "grafico-loss-landscape", Pontos);
                 }
                 
                 StateHasChanged();
@@ -79,6 +91,7 @@
         finally
         {
             Calculando = false;
+            StateHasChanged();
         }
     }
 }
