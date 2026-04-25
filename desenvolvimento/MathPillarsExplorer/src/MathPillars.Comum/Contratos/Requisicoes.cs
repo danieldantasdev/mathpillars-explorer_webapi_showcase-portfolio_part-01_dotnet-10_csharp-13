@@ -10,6 +10,7 @@ public record RequisicaoAutovetores(double[][] Elementos, int Dimensao);
 // Calculo
 public record RequisicaoGradiente(string FuncaoNome, double[] Ponto);
 public record RequisicaoLossLandscape(string FuncaoNome, double MinX, double MaxX, double MinY, double MaxY);
+public record RequisicaoJacobiana(string SistemaNome, double[] Ponto);
 
 // Probabilidade
 public record RequisicaoBayes(double PriorH, double VerossimilhancaEH, double VerossimilhancaENaoH);

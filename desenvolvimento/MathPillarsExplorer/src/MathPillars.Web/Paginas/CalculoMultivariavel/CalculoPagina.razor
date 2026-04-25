@@ -68,6 +68,10 @@ else if (ExperimentoAtivo == "Jacobiana")
 
     <div class="cartao-premium">
         <h4>Laboratorio: Linearizacao de Sistemas</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+            <div><label>Ponto X</label><input type="number" @bind="PontoJacobianaX" class="input-premium" /></div>
+            <div><label>Ponto Y</label><input type="number" @bind="PontoJacobianaY" class="input-premium" /></div>
+        </div>
         <button class="botao-primario" @onclick="CalcularJacobiana">Computar Jacobiana</button>
         
         @if (resultadoJacobiana != null)
@@ -90,11 +94,21 @@ else if (ExperimentoAtivo == "Otimizadores")
 
     <div class="cartao-premium">
         <h4>Laboratorio: Convergencia Comparativa</h4>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+            <div>
+                <label>Funcao de Custo</label>
+                <select @bind="FuncaoSelecionada" class="input-premium">
+                    <option value="Rosenbrock">Rosenbrock</option>
+                    <option value="Quadratica">Quadratica ($x^2 + y^2$)</option>
+                </select>
+            </div>
+            <div><label>Learning Rate</label><input type="number" step="0.001" @bind="LearningRate" class="input-premium" /></div>
+            <div><label>Iteracoes</label><input type="number" step="10" @bind="Iteracoes" class="input-premium" /></div>
             <div><label>X Inicial</label><input type="number" @bind="XIni" class="input-premium" /></div>
             <div><label>Y Inicial</label><input type="number" @bind="YIni" class="input-premium" /></div>
         </div>
-        <button class="botao-primario" @onclick="CompararOtimizadores">Iniciar Comparacao</button>
+        <button class="botao-primario" @onclick="CompararOtimizadores" disabled="@Calculando">Iniciar Comparacao</button>
+        <ProgressoSSE Visivel="@Calculando" Percentual="@ProgressoOtim" Mensagem="@MensagemOtim" />
         
         @if (resultadoOtimizadores != null)
         {
@@ -140,10 +154,16 @@ else if (ExperimentoAtivo == "Otimizadores")
     private MathPillars.Comum.Primitivos.Vetor? vetorGradiente;
 
     // Jacobiana
+    private double PontoJacobianaX = 1.0, PontoJacobianaY = 1.0;
     private MathPillars.Comum.Primitivos.Matriz? resultadoJacobiana;
 
     // Otimizadores
+    private string FuncaoSelecionada = "Rosenbrock";
+    private double LearningRate = 0.01;
+    private int Iteracoes = 100;
     private double XIni = -1.5, YIni = 2.5;
+    private int ProgressoOtim = 0;
+    private string MensagemOtim = "";
     private ResultadoComparacaoOtimizadores? resultadoOtimizadores;
 
     private async Task GerarSuperficie()
@@ -162,21 +182,30 @@ else if (ExperimentoAtivo == "Otimizadores")
     private async Task CalcularGradiente()
     {
         vetorGradiente = await Cliente.PostAsync<RequisicaoGradiente, MathPillars.Comum.Primitivos.Vetor>("api/calculo/gradiente", new("rosenbrock", new[] { PontoX, PontoY }));
+        await Task.Delay(100);
+        await JS.InvokeVoidAsync("renderizarMatematica");
     }
 
     private async Task CalcularJacobiana()
     {
-        resultadoJacobiana = await Cliente.PostAsync<dynamic, MathPillars.Comum.Primitivos.Matriz>("api/calculo/jacobiana", new { });
+        resultadoJacobiana = await Cliente.PostAsync<RequisicaoJacobiana, MathPillars.Comum.Primitivos.Matriz>("api/calculo/jacobiana", new("sistema-base", new[] { PontoJacobianaX, PontoJacobianaY }));
+        await Task.Delay(100);
+        await JS.InvokeVoidAsync("renderizarMatematica");
     }
 
     private async Task CompararOtimizadores()
     {
-        var url = $"api/calculo/otimizador/comparar/stream?funcaoNome=rosenbrock&xInicial={XIni}&yInicial={YIni}";
+        Calculando = true; resultadoOtimizadores = null; ProgressoOtim = 0;
+        var url = $"api/calculo/otimizador/comparar/stream?funcaoNome={FuncaoSelecionada}&xInicial={XIni}&yInicial={YIni}&learningRate={LearningRate}&iteracoes={Iteracoes}";
         await foreach (var ev in Cliente.ObterStreamSSE<ResultadoSSE<ResultadoComparacaoOtimizadores>>(url))
         {
+            ProgressoOtim = ev.ProgressoPercentual; MensagemOtim = ev.MensagemProgresso;
             if (ev.Concluido) resultadoOtimizadores = ev.DadosParciais;
             StateHasChanged();
         }
+        Calculando = false;
+        await Task.Delay(100);
+        await JS.InvokeVoidAsync("renderizarMatematica");
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

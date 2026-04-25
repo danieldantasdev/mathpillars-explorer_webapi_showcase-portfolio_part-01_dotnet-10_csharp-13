@@ -53,21 +53,21 @@ public class CalculoControlador : ControllerBase
     public async Task GetCompararOtimizadores(
         [FromQuery] string funcaoNome,
         [FromQuery] double xInicial,
-        [FromQuery] double yInicial)
+        [FromQuery] double yInicial,
+        [FromQuery] double learningRate = 0.01,
+        [FromQuery] int iteracoes = 100)
     {
         Response.Headers.Append("Content-Type", "text/event-stream");
-        await foreach (var evento in _comparadorServico.CompararCaminhosSSE(funcaoNome, xInicial, yInicial))
+        await foreach (var evento in _comparadorServico.CompararCaminhosSSE(funcaoNome, xInicial, yInicial, learningRate, iteracoes))
         {
             await SSEHelper.EscreverEventoAsync(Response, evento);
         }
     }
 
     [HttpPost("jacobiana")]
-
-    public ActionResult<Matriz> PostCalcularJacobiana([FromBody] dynamic requisicao)
+    public ActionResult<Matriz> PostCalcularJacobiana([FromBody] RequisicaoJacobiana requisicao)
     {
-        // Simplificado para teste: funcao f(x,y) = [x^2 + y, y^2 + x]
-        var ponto = new Vetor(new double[] { 1.0, 1.0 });
+        var ponto = new Vetor(requisicao.Ponto);
         return Ok(_jacobianaServico.CalcularJacobiana(p => new double[] { p[0] * p[0] + p[1], p[1] * p[1] + p[0] }, ponto));
     }
 }
