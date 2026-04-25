@@ -50,14 +50,21 @@
     private int Progresso = 0;
     private string Mensagem = "";
     private PontoSuperficie3D[]? Pontos;
+    private CancellationTokenSource? _cts;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await JS.InvokeVoidAsync("renderizarMatematica");
+        if (firstRender || !Calculando)
+        {
+            await JS.InvokeVoidAsync("renderizarMatematica");
+        }
     }
 
     private async Task GerarSuperficie()
     {
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+        
         Calculando = true;
         Pontos = null;
         Progresso = 0;
@@ -68,7 +75,7 @@
 
         try
         {
-            await foreach (var evento in Cliente.ObterStreamSSE<ResultadoSSE<PontoSuperficie3D[]>>(url))
+            await foreach (var evento in Cliente.ObterStreamSSE<ResultadoSSE<PontoSuperficie3D[]>>(url).WithCancellation(_cts.Token))
             {
                 Progresso = evento.ProgressoPercentual;
                 Mensagem = evento.MensagemProgresso;
@@ -77,13 +84,14 @@
                 {
                     Pontos = evento.DadosParciais;
                     StateHasChanged();
-                    await Task.Delay(100); // Pequeno delay para garantir o render do DOM
+                    await Task.Delay(200); // Garantir render do div
                     await JS.InvokeVoidAsync("renderizarGrafico3D", "grafico-loss-landscape", Pontos);
                 }
                 
                 StateHasChanged();
             }
         }
+        catch (OperationCanceledException) { }
         catch (Exception ex)
         {
             Mensagem = "Erro: " + ex.Message;

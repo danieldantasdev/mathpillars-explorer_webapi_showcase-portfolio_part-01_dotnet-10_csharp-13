@@ -51,18 +51,26 @@
     private int Progresso = 0;
     private string Mensagem = "";
     private ResultadoSVD? Resultado;
+    private CancellationTokenSource? _cts;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await JS.InvokeVoidAsync("renderizarMatematica");
+        if (firstRender || !Calculando)
+        {
+            await JS.InvokeVoidAsync("renderizarMatematica");
+        }
     }
 
     private async Task IniciarSVD()
     {
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+
         Calculando = true;
         Resultado = null;
         Progresso = 0;
         Mensagem = "Iniciando conexao SSE...";
+        StateHasChanged();
 
         var elementos = new double[] { 1, 2, 3, 4, 5, 6 };
         var json = System.Text.Json.JsonSerializer.Serialize(elementos);
@@ -70,7 +78,7 @@
 
         try
         {
-            await foreach (var evento in Cliente.ObterStreamSSE<ResultadoSSE<ResultadoSVD>>(url))
+            await foreach (var evento in Cliente.ObterStreamSSE<ResultadoSSE<ResultadoSVD>>(url).WithCancellation(_cts.Token))
             {
                 Progresso = evento.ProgressoPercentual;
                 Mensagem = evento.MensagemProgresso;
@@ -83,6 +91,7 @@
                 StateHasChanged();
             }
         }
+        catch (OperationCanceledException) { }
         catch (Exception ex)
         {
             Mensagem = "Erro: " + ex.Message;
@@ -90,6 +99,7 @@
         finally
         {
             Calculando = false;
+            StateHasChanged();
         }
     }
 }

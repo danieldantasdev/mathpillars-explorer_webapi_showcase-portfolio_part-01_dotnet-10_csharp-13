@@ -19,28 +19,54 @@ public class LeitorSSE
 
     public async IAsyncEnumerable<T> LerStreamAsync<T>(string url, [EnumeratorCancellation] CancellationToken cancelamento = default)
     {
-        using var requisicao = new HttpRequestMessage(HttpMethod.Get, url);
-        requisicao.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("text/event-stream"));
-
-        using var resposta = await _httpClient.SendAsync(requisicao, HttpCompletionOption.ResponseHeadersRead, cancelamento);
-        resposta.EnsureSuccessStatusCode();
-
-        using var fluxo = await resposta.Content.ReadAsStreamAsync(cancelamento);
-        using var leitor = new StreamReader(fluxo);
-
-        while (!cancelamento.IsCancellationRequested)
+        HttpRequestMessage? requisicao = null;
+        try
         {
-            var linha = await leitor.ReadLineAsync();
-            if (linha == null) break; // Fim do stream
-            
-            if (string.IsNullOrWhiteSpace(linha)) continue;
+            requisicao = new HttpRequestMessage(HttpMethod.Get, url);
+            requisicao.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("text/event-stream"));
 
-            if (linha.StartsWith("data:"))
+            using var resposta = await _httpClient.SendAsync(requisicao, HttpCompletionOption.ResponseHeadersRead, cancelamento);
+            resposta.EnsureSuccessStatusCode();
+
+            using var fluxo = await resposta.Content.ReadAsStreamAsync(cancelamento);
+            using var leitor = new StreamReader(fluxo);
+
+            while (!cancelamento.IsCancellationRequested)
             {
-                var json = linha.Substring(5).Trim();
-                var dado = JsonSerializer.Deserialize<T>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                if (dado != null) yield return dado;
+                string? linha;
+                try
+                {
+                    linha = await leitor.ReadLineAsync();
+                }
+                catch
+                {
+                    break; // Erro de leitura ou conexao fechada
+                }
+
+                if (linha == null) break; // Fim do stream
+                
+                if (string.IsNullOrWhiteSpace(linha)) continue;
+
+                if (linha.StartsWith("data:"))
+                {
+                    var json = linha.Substring(5).Trim();
+                    T? dado = default;
+                    try
+                    {
+                        dado = JsonSerializer.Deserialize<T>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    }
+                    catch
+                    {
+                        continue; // Ignora pacotes JSON invalidos
+                    }
+                    
+                    if (dado != null) yield return dado;
+                }
             }
+        }
+        finally
+        {
+            requisicao?.Dispose();
         }
     }
 }

@@ -17,44 +17,57 @@
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js" charset="utf-8"></script>
     <script>
         window.renderizarMatematica = () => {
-            if (window.renderMathInElement) {
-                renderMathInElement(document.body, {
-                    delimiters: [
-                        {left: '$$', right: '$$', display: true},
-                        {left: '$', right: '$', display: false}
-                    ]
-                });
+            try {
+                if (window.renderMathInElement) {
+                    renderMathInElement(document.body, {
+                        delimiters: [
+                            {left: '$$', right: '$$', display: true},
+                            {left: '$', right: '$', display: false}
+                        ],
+                        throwOnError: false,
+                        ignoredTags: ["script", "noscript", "style", "textarea", "pre", "code", "option", "svg", "canvas"]
+                    });
+                }
+            } catch (e) {
+                console.warn("Erro ao renderizar KaTeX:", e);
             }
         };
 
         window.renderizarGrafico3D = (idElemento, pontos) => {
-            const x = pontos.map(p => p.x);
-            const y = pontos.map(p => p.y);
-            const z = pontos.map(p => p.z);
+            try {
+                const el = document.getElementById(idElemento);
+                if (!el) return;
 
-            const dados = [{
-                x: x,
-                y: y,
-                z: z,
-                type: 'mesh3d',
-                intensity: z,
-                colorscale: 'Viridis',
-                opacity: 0.8
-            }];
+                const x = pontos.map(p => p.x);
+                const y = pontos.map(p => p.y);
+                const z = pontos.map(p => p.z);
 
-            const layout = {
-                margin: { l: 0, r: 0, b: 0, t: 0 },
-                scene: {
-                    xaxis: { title: 'X', gridcolor: '#444' },
-                    yaxis: { title: 'Y', gridcolor: '#444' },
-                    zaxis: { title: 'Z', gridcolor: '#444' },
-                    bgcolor: 'rgba(0,0,0,0)'
-                },
-                paper_bgcolor: 'rgba(0,0,0,0)',
-                plot_bgcolor: 'rgba(0,0,0,0)'
-            };
+                const dados = [{
+                    x: x,
+                    y: y,
+                    z: z,
+                    type: 'mesh3d',
+                    intensity: z,
+                    colorscale: 'Viridis',
+                    opacity: 0.8
+                }];
 
-            Plotly.newPlot(idElemento, dados, layout, { responsive: true, displayModeBar: false });
+                const layout = {
+                    margin: { l: 0, r: 0, b: 0, t: 0 },
+                    scene: {
+                        xaxis: { title: 'X', gridcolor: '#444' },
+                        yaxis: { title: 'Y', gridcolor: '#444' },
+                        zaxis: { title: 'Z', gridcolor: '#444' },
+                        bgcolor: 'rgba(0,0,0,0)'
+                    },
+                    paper_bgcolor: 'rgba(0,0,0,0)',
+                    plot_bgcolor: 'rgba(0,0,0,0)'
+                };
+
+                Plotly.newPlot(idElemento, dados, layout, { responsive: true, displayModeBar: false });
+            } catch (e) {
+                console.error("Erro ao renderizar Plotly:", e);
+            }
         };
     </script>
 </head>
