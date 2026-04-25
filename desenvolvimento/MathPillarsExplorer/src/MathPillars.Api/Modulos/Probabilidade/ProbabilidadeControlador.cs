@@ -13,15 +13,18 @@ public class ProbabilidadeControlador : ControllerBase
     private readonly BayesServico _bayesServico;
     private readonly GaussianaServico _gaussianaServico;
     private readonly EntropiaCruzadaServico _entropiaServico;
+    private readonly MarkovServico _markovServico;
 
     public ProbabilidadeControlador(
         BayesServico bayesServico, 
         GaussianaServico gaussianaServico,
-        EntropiaCruzadaServico entropiaServico)
+        EntropiaCruzadaServico entropiaServico,
+        MarkovServico markovServico)
     {
         _bayesServico = bayesServico;
         _gaussianaServico = gaussianaServico;
         _entropiaServico = entropiaServico;
+        _markovServico = markovServico;
     }
 
     [HttpPost("bayes")]
@@ -51,5 +54,16 @@ public class ProbabilidadeControlador : ControllerBase
         double[] real = new[] { 1.0, 0.0, 0.0 };
         double[] pred = new[] { 0.7, 0.2, 0.1 };
         return Ok(_entropiaServico.Calcular(real, pred));
+    }
+
+    [HttpPost("markov")]
+    public ActionResult<ResultadoMarkov> PostSimularMarkov([FromBody] dynamic req)
+    {
+        // Exemplo: 2 estados (S0: Sol, S1: Chuva)
+        var matriz = new double[][] {
+            new double[] { 0.7, 0.3 },
+            new double[] { 0.4, 0.6 }
+        };
+        return Ok(_markovServico.Simular(matriz, 100, 0));
     }
 }

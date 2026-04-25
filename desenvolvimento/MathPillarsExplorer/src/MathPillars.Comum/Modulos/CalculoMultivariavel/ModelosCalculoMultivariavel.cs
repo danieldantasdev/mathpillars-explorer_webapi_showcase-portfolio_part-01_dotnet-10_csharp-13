@@ -12,7 +12,7 @@ public record PontoSuperficie3D(double X, double Y, double Z);
 /// </summary>
 public record ResultadoComparacaoOtimizadores(
     PontoSuperficie3D[] TrajetoriaAdamW,
-    PontoSuperficie3D[] TrajectorySophia,
+    PontoSuperficie3D[] TrajetoriaSophia,
     double[] PerdasAdamW,
     double[] PerdasSophia
 );

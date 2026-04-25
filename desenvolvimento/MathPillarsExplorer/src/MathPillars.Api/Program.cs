@@ -34,6 +34,7 @@ builder.Services.AddScoped<ComparadorOtimizadoresServico>();
 builder.Services.AddScoped<BayesServico>();
 builder.Services.AddScoped<GaussianaServico>();
 builder.Services.AddScoped<EntropiaCruzadaServico>();
+builder.Services.AddScoped<MarkovServico>();
 
 var app = builder.Build();
 

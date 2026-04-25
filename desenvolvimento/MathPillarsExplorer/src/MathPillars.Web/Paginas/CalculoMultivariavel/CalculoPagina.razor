@@ -37,11 +37,11 @@ else if (ExperimentoAtivo == "Gradiente")
 {
     <PainelTeoria Titulo="Gradiente Descendente">
         <p>O gradiente aponta para a direcao de maior subida. Seguimos o oposto para minimizar.</p>
-        <div class="formula-matematica">$\theta_{t+1} = \theta_t - \eta \nabla J(\theta_t)$</div>
+        <div class="formula-matematica" style="text-align: center;">$$\theta_{t+1} = \theta_t - \eta \nabla J(\theta_t)$$</div>
     </PainelTeoria>
 
     <div class="cartao-premium">
-        <h4>Laboratorio: Calculo de Inclinação Local</h4>
+        <h4>Laboratorio: Calculo de Inclinacao Local</h4>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
             <div><label>Ponto X</label><input type="number" @bind="PontoX" class="input-premium" /></div>
             <div><label>Ponto Y</label><input type="number" @bind="PontoY" class="input-premium" /></div>
@@ -63,6 +63,7 @@ else if (ExperimentoAtivo == "Jacobiana")
 {
     <PainelTeoria Titulo="Matriz Jacobiana">
         <p>A Jacobiana e a generalizacao do gradiente para funcoes vetoriais, essencial no Backpropagation.</p>
+        <div class="formula-matematica" style="text-align: center;">$$J = \begin{bmatrix} \frac{\partial f_1}{\partial x_1} & \cdots & \frac{\partial f_1}{\partial x_n} \\ \vdots & \ddots & \vdots \end{bmatrix}$$</div>
     </PainelTeoria>
 
     <div class="cartao-premium">
@@ -80,6 +81,36 @@ else if (ExperimentoAtivo == "Jacobiana")
         }
     </div>
 }
+else if (ExperimentoAtivo == "Otimizadores")
+{
+    <PainelTeoria Titulo="AdamW vs Sophia">
+        <p>Compare otimizadores de primeira ordem (AdamW) com otimizadores de segunda ordem (Sophia).</p>
+        <div class="formula-matematica" style="text-align: center;">$$\text{Sophia: } \theta_{t+1} = \theta_t - \eta \cdot \frac{m_t}{h_t}$$</div>
+    </PainelTeoria>
+
+    <div class="cartao-premium">
+        <h4>Laboratorio: Convergencia Comparativa</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+            <div><label>X Inicial</label><input type="number" @bind="XIni" class="input-premium" /></div>
+            <div><label>Y Inicial</label><input type="number" @bind="YIni" class="input-premium" /></div>
+        </div>
+        <button class="botao-primario" @onclick="CompararOtimizadores">Iniciar Comparacao</button>
+        
+        @if (resultadoOtimizadores != null)
+        {
+            <div style="margin-top: 2rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="resultado-box-verde" style="background-color: var(--cor-primaria);">
+                    <h6>Iteracoes AdamW</h6>
+                    <h3>@resultadoOtimizadores.TrajetoriaAdamW.Length</h3>
+                </div>
+                <div class="resultado-box-verde">
+                    <h6>Iteracoes Sophia</h6>
+                    <h3>@resultadoOtimizadores.TrajetoriaSophia.Length</h3>
+                </div>
+            </div>
+        }
+    </div>
+}
 
 <style>
     .input-premium { width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--cor-borda); background: white; }
@@ -89,7 +120,16 @@ else if (ExperimentoAtivo == "Jacobiana")
 </style>
 
 @code {
-    private string ExperimentoAtivo = "Landscape";
+    private string _experimentoAtivo = "Landscape";
+    private string ExperimentoAtivo 
+    { 
+        get => _experimentoAtivo; 
+        set 
+        { 
+            _experimentoAtivo = value; 
+            _ = Task.Run(async () => { await Task.Delay(100); await JS.InvokeVoidAsync("renderizarMatematica"); });
+        } 
+    }
     private bool Calculando = false;
 
     // Landscape
@@ -101,6 +141,10 @@ else if (ExperimentoAtivo == "Jacobiana")
 
     // Jacobiana
     private MathPillars.Comum.Primitivos.Matriz? resultadoJacobiana;
+
+    // Otimizadores
+    private double XIni = -1.5, YIni = 2.5;
+    private ResultadoComparacaoOtimizadores? resultadoOtimizadores;
 
     private async Task GerarSuperficie()
     {
@@ -123,6 +167,16 @@ else if (ExperimentoAtivo == "Jacobiana")
     private async Task CalcularJacobiana()
     {
         resultadoJacobiana = await Cliente.PostAsync<dynamic, MathPillars.Comum.Primitivos.Matriz>("api/calculo/jacobiana", new { });
+    }
+
+    private async Task CompararOtimizadores()
+    {
+        var url = $"api/calculo/otimizador/comparar/stream?funcaoNome=rosenbrock&xInicial={XIni}&yInicial={YIni}";
+        await foreach (var ev in Cliente.ObterStreamSSE<ResultadoSSE<ResultadoComparacaoOtimizadores>>(url))
+        {
+            if (ev.Concluido) resultadoOtimizadores = ev.DadosParciais;
+            StateHasChanged();
+        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

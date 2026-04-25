@@ -49,7 +49,21 @@ public class CalculoControlador : ControllerBase
         }
     }
 
+    [HttpGet("otimizador/comparar/stream")]
+    public async Task GetCompararOtimizadores(
+        [FromQuery] string funcaoNome,
+        [FromQuery] double xInicial,
+        [FromQuery] double yInicial)
+    {
+        Response.Headers.Append("Content-Type", "text/event-stream");
+        await foreach (var evento in _comparadorServico.CompararCaminhosSSE(funcaoNome, xInicial, yInicial))
+        {
+            await SSEHelper.EscreverEventoAsync(Response, evento);
+        }
+    }
+
     [HttpPost("jacobiana")]
+
     public ActionResult<Matriz> PostCalcularJacobiana([FromBody] dynamic requisicao)
     {
         // Simplificado para teste: funcao f(x,y) = [x^2 + y, y^2 + x]

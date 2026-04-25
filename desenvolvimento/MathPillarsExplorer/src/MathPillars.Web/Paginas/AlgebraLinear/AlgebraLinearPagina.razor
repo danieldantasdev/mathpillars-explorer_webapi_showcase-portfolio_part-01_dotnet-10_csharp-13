@@ -20,7 +20,7 @@
 {
     <PainelTeoria Titulo="Decomposicao em Valores Singulares (SVD)">
         <p>A SVD e uma das ferramentas mais poderosas da algebra linear, permitindo a fatoracao de qualquer matriz $A_{m \times n}$.</p>
-        <div class="formula-matematica" style="text-align: center;">$A = U \Sigma V^T$</div>
+        <div class="formula-matematica" style="text-align: center;">$$A = U \Sigma V^T$$</div>
     </PainelTeoria>
 
     <div class="cartao-premium">
@@ -90,7 +90,7 @@ else if (ExperimentoAtivo == "Similaridade")
 {
     <PainelTeoria Titulo="Similaridade de Cosseno">
         <p>Mede o cosseno do angulo entre dois vetores. Muito usado em NLP para comparar embeddings.</p>
-        <div class="formula-matematica">$\cos(\theta) = \frac{A \cdot B}{\|A\| \|B\|}$</div>
+        <div class="formula-matematica" style="text-align: center;">$$\cos(\theta) = \frac{A \cdot B}{\|A\| \|B\|}$$</div>
     </PainelTeoria>
 
     <div class="cartao-premium">
@@ -123,7 +123,7 @@ else if (ExperimentoAtivo == "Autovetores")
 {
     <PainelTeoria Titulo="Autovetores e Autovalores">
         <p>Analise a estrutura de uma matriz quadrada $A$ atraves de seus eixos de estiramento.</p>
-        <div class="formula-matematica">$Ax = \lambda x$</div>
+        <div class="formula-matematica" style="text-align: center;">$$Ax = \lambda x$$</div>
     </PainelTeoria>
 
     <div class="cartao-premium">
@@ -156,7 +156,19 @@ else if (ExperimentoAtivo == "Autovetores")
 </style>
 
 @code {
-    private string ExperimentoAtivo = "SVD";
+    private string _experimentoAtivo = "SVD";
+    private string ExperimentoAtivo 
+    { 
+        get => _experimentoAtivo; 
+        set 
+        { 
+            _experimentoAtivo = value; 
+            _ = Task.Run(async () => {
+                await Task.Delay(100);
+                await JS.InvokeVoidAsync("renderizarMatematica");
+            });
+        } 
+    }
     private bool Calculando = false;
     private int Progresso = 0;
     private string Mensagem = "";

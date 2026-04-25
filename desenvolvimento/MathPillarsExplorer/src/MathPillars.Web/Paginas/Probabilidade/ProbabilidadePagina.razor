@@ -12,13 +12,14 @@
     <button class="@(ExperimentoAtivo == "Bayes" ? "botao-primario" : "botao-secundario")" @onclick='() => ExperimentoAtivo = "Bayes"'>Bayes</button>
     <button class="@(ExperimentoAtivo == "Gaussiana" ? "botao-primario" : "botao-secundario")" @onclick='() => ExperimentoAtivo = "Gaussiana"'>Gaussiana</button>
     <button class="@(ExperimentoAtivo == "Entropia" ? "botao-primario" : "botao-secundario")" @onclick='() => ExperimentoAtivo = "Entropia"'>Entropia Cruzada</button>
+    <button class="@(ExperimentoAtivo == "Markov" ? "botao-primario" : "botao-secundario")" @onclick='() => ExperimentoAtivo = "Markov"'>Markov</button>
 </div>
 
 @if (ExperimentoAtivo == "Bayes")
 {
     <PainelTeoria Titulo="Teorema de Bayes">
         <p>Atualizacao de crencas baseada em novas evidencias.</p>
-        <div class="formula-matematica">$P(H|E) = \frac{P(E|H) \cdot P(H)}{P(E)}$</div>
+        <div class="formula-matematica" style="text-align: center;">$$P(H|E) = \frac{P(E|H) \cdot P(H)}{P(E)}$$</div>
     </PainelTeoria>
 
     <div class="cartao-premium">
@@ -34,7 +35,7 @@
         {
             <div style="margin-top: 2rem;">
                 <div class="resultado-box-verde">
-                    <h6>Posterior Calculada</h6>
+                    <h6>Posterior Calculada $P(H|E)$</h6>
                     <h3>@resultadoBayes.ProbabilidadePosterior.ToString("P2")</h3>
                 </div>
             </div>
@@ -45,6 +46,7 @@ else if (ExperimentoAtivo == "Gaussiana")
 {
     <PainelTeoria Titulo="Distribuicao Normal (Gaussiana)">
         <p>A curva em sino que descreve a maioria dos fenomenos naturais e erros em IA.</p>
+        <div class="formula-matematica" style="text-align: center;">$$f(x) = \frac{1}{\sigma\sqrt{2\pi}} e^{-\frac{1}{2}(\frac{x-\mu}{\sigma})^2}$$</div>
     </PainelTeoria>
 
     <div class="cartao-premium">
@@ -61,6 +63,7 @@ else if (ExperimentoAtivo == "Entropia")
 {
     <PainelTeoria Titulo="Entropia Cruzada (Cross-Entropy)">
         <p>Mede a disparidade entre a distribuicao real e a predita pelo modelo de IA.</p>
+        <div class="formula-matematica" style="text-align: center;">$$H(p, q) = -\sum_{x} p(x) \log q(x)$$</div>
     </PainelTeoria>
 
     <div class="cartao-premium">
@@ -78,6 +81,28 @@ else if (ExperimentoAtivo == "Entropia")
         }
     </div>
 }
+else if (ExperimentoAtivo == "Markov")
+{
+    <PainelTeoria Titulo="Cadeias de Markov">
+        <p>Modelagem de sistemas que evoluem de um estado para outro com probabilidades fixas.</p>
+        <div class="formula-matematica" style="text-align: center;">$$P(X_{t+1} | X_t, \dots, X_0) = P(X_{t+1} | X_t)$$</div>
+    </PainelTeoria>
+
+    <div class="cartao-premium">
+        <h4>Laboratorio: Processos Estocasticos</h4>
+        <button class="botao-primario" @onclick="SimularMarkov">Simular 100 Passos</button>
+        
+        @if (resultadoMarkov != null)
+        {
+            <div style="margin-top: 2rem;">
+                <div class="resultado-box-verde">
+                    <h6>Distribuicao Estacionaria (Estado 0 / Estado 1)</h6>
+                    <h3>@resultadoMarkov.DistribuicaoFinal[0].ToString("P1") / @resultadoMarkov.DistribuicaoFinal[1].ToString("P1")</h3>
+                </div>
+            </div>
+        }
+    </div>
+}
 
 <style>
     .input-premium { width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--cor-borda); background: white; }
@@ -86,7 +111,16 @@ else if (ExperimentoAtivo == "Entropia")
 </style>
 
 @code {
-    private string ExperimentoAtivo = "Bayes";
+    private string _experimentoAtivo = "Bayes";
+    private string ExperimentoAtivo 
+    { 
+        get => _experimentoAtivo; 
+        set 
+        { 
+            _experimentoAtivo = value; 
+            _ = Task.Run(async () => { await Task.Delay(100); await JS.InvokeVoidAsync("renderizarMatematica"); });
+        } 
+    }
 
     // Bayes
     private double Prior = 0.01, Verossimilhanca = 0.99, FalsoPositivo = 0.05;
@@ -97,6 +131,9 @@ else if (ExperimentoAtivo == "Entropia")
 
     // Entropia
     private ResultadoEntropiaCruzada? resultadoEntropia;
+
+    // Markov
+    private ResultadoMarkov? resultadoMarkov;
 
     private async Task CalcularBayes()
     {
@@ -117,6 +154,11 @@ else if (ExperimentoAtivo == "Entropia")
     private async Task CalcularEntropia()
     {
         resultadoEntropia = await Cliente.PostAsync<dynamic, ResultadoEntropiaCruzada>("api/probabilidade/entropia-cruzada", new { });
+    }
+
+    private async Task SimularMarkov()
+    {
+        resultadoMarkov = await Cliente.PostAsync<dynamic, ResultadoMarkov>("api/probabilidade/markov", new { });
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

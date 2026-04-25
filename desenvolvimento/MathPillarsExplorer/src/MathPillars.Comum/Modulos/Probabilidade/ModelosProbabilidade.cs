@@ -23,3 +23,8 @@ public record ResultadoEntropiaCruzada(
     double EntropiaShannonDistribuicaoA,
     double DivergenciaKL
 );
+
+/// <summary>
+/// Resultado da simulacao de Cadeias de Markov.
+/// </summary>
+public record ResultadoMarkov(int[] HistoricoEstados, double[] DistribuicaoFinal);
