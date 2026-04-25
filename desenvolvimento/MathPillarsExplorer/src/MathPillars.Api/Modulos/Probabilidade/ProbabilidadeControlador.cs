@@ -34,15 +34,10 @@ public class ProbabilidadeControlador : ControllerBase
     }
 
     [HttpGet("gaussiana/stream")]
-    public async Task GetGerarGaussianaComStreaming(
-        [FromQuery] double media,
-        [FromQuery] double desvioPadrao,
-        [FromQuery] double min,
-        [FromQuery] double max,
-        [FromQuery] int pontos)
+    public async Task GetGerarGaussianaComStreaming([FromQuery] RequisicaoGaussiana req)
     {
         Response.Headers.Append("Content-Type", "text/event-stream");
-        await foreach (var evento in _gaussianaServico.GerarCurvaGaussianaComStreamingSSE(media, desvioPadrao, min, max, pontos))
+        await foreach (var evento in _gaussianaServico.GerarCurvaGaussianaComStreamingSSE(req.Media, req.DesvioPadrao, req.Min, req.Max, req.Pontos))
         {
             await SSEHelper.EscreverEventoAsync(Response, evento);
         }

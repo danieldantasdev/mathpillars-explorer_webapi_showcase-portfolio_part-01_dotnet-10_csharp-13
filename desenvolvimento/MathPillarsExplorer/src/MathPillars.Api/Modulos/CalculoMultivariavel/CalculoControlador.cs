@@ -35,30 +35,20 @@ public class CalculoControlador : ControllerBase
     }
 
     [HttpGet("loss-landscape/stream")]
-    public async Task GetGerarLossLandscapeComStreaming(
-        [FromQuery] string funcaoNome,
-        [FromQuery] double minX,
-        [FromQuery] double maxX,
-        [FromQuery] double minY,
-        [FromQuery] double maxY)
+    public async Task GetGerarLossLandscapeComStreaming([FromQuery] RequisicaoLossLandscape req)
     {
         Response.Headers.Append("Content-Type", "text/event-stream");
-        await foreach (var evento in _lossLandscapeServico.GerarSuperficieComStreamingSSE(funcaoNome, minX, maxX, minY, maxY))
+        await foreach (var evento in _lossLandscapeServico.GerarSuperficieComStreamingSSE(req.FuncaoNome, req.MinX, req.MaxX, req.MinY, req.MaxY))
         {
             await SSEHelper.EscreverEventoAsync(Response, evento);
         }
     }
-
+ 
     [HttpGet("otimizador/comparar/stream")]
-    public async Task GetCompararOtimizadores(
-        [FromQuery] string funcaoNome,
-        [FromQuery] double xInicial,
-        [FromQuery] double yInicial,
-        [FromQuery] double learningRate = 0.01,
-        [FromQuery] int iteracoes = 100)
+    public async Task GetCompararOtimizadores([FromQuery] RequisicaoComparacaoOtimizadores req)
     {
         Response.Headers.Append("Content-Type", "text/event-stream");
-        await foreach (var evento in _comparadorServico.CompararCaminhosSSE(funcaoNome, xInicial, yInicial, learningRate, iteracoes))
+        await foreach (var evento in _comparadorServico.CompararCaminhosSSE(req.FuncaoNome, req.XInicial, req.YInicial, req.LearningRate, req.Iteracoes))
         {
             await SSEHelper.EscreverEventoAsync(Response, evento);
         }

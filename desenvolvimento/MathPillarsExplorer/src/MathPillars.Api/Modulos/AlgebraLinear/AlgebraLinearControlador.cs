@@ -47,23 +47,20 @@ public class AlgebraLinearControlador : ControllerBase
     }
 
     [HttpGet("svd/stream")]
-    public async Task GetDecomporSVDComStreaming(
-        [FromQuery] int linhas,
-        [FromQuery] int colunas,
-        [FromQuery] string elementosJson)
+    public async Task GetDecomporSVDComStreaming([FromQuery] RequisicaoSVD req)
     {
         Response.Headers.Append("Content-Type", "text/event-stream");
         Response.Headers.Append("Cache-Control", "no-cache");
         Response.Headers.Append("Connection", "keep-alive");
 
-        var elementos = System.Text.Json.JsonSerializer.Deserialize<double[]>(elementosJson)!;
-        var elementosMatrix = new double[linhas][];
-        for (var i = 0; i < linhas; i++)
+        var elementos = System.Text.Json.JsonSerializer.Deserialize<double[]>(req.ElementosJson)!;
+        var elementosMatrix = new double[req.Linhas][];
+        for (var i = 0; i < req.Linhas; i++)
         {
-            elementosMatrix[i] = new double[colunas];
-            for (var j = 0; j < colunas; j++)
+            elementosMatrix[i] = new double[req.Colunas];
+            for (var j = 0; j < req.Colunas; j++)
             {
-                elementosMatrix[i][j] = elementos[i * colunas + j];
+                elementosMatrix[i][j] = elementos[i * req.Colunas + j];
             }
         }
 
@@ -83,23 +80,19 @@ public class AlgebraLinearControlador : ControllerBase
     }
 
     [HttpGet("pca/stream")]
-    public async Task GetCalcularPCA(
-        [FromQuery] int linhas,
-        [FromQuery] int colunas,
-        [FromQuery] string elementosJson,
-        [FromQuery] int componentes)
+    public async Task GetCalcularPCA([FromQuery] RequisicaoPCA req)
     {
         Response.Headers.Append("Content-Type", "text/event-stream");
-        var elementos = System.Text.Json.JsonSerializer.Deserialize<double[]>(elementosJson)!;
-        var dados = new double[linhas][];
-        for (var i = 0; i < linhas; i++)
+        var elementos = System.Text.Json.JsonSerializer.Deserialize<double[]>(req.ElementosJson)!;
+        var dados = new double[req.Linhas][];
+        for (var i = 0; i < req.Linhas; i++)
         {
-            dados[i] = new double[colunas];
-            for (var j = 0; j < colunas; j++)
-                dados[i][j] = elementos[i * colunas + j];
+            dados[i] = new double[req.Colunas];
+            for (var j = 0; j < req.Colunas; j++)
+                dados[i][j] = elementos[i * req.Colunas + j];
         }
 
-        await foreach (var evento in _pcaServico.CalcularPCAComStreamingSSE(dados, componentes))
+        await foreach (var evento in _pcaServico.CalcularPCAComStreamingSSE(dados, req.Componentes))
         {
             await SSEHelper.EscreverEventoAsync(Response, evento);
         }
