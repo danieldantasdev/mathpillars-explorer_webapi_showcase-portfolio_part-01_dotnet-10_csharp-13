@@ -8,7 +8,7 @@ builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
 // Configuracao do HttpClient para apontar para a API (ajustar porta conforme necessario no ambiente)
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("http://localhost:5000") });
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("http://localhost:5296") });
 
 // Registro dos servicos customizados do MathPillars
 builder.Services.AddScoped<LeitorSSE>();
