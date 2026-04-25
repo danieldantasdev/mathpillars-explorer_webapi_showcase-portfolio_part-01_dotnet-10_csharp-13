@@ -14,3 +14,5 @@ public record RequisicaoJacobiana(string SistemaNome, double[] Ponto);
 
 // Probabilidade
 public record RequisicaoBayes(double PriorH, double VerossimilhancaEH, double VerossimilhancaENaoH);
+public record RequisicaoEntropiaCruzada(double[] Real, double[] Predito);
+public record RequisicaoMarkov(double[][] MatrizTransicao, int Passos, int EstadoInicial);

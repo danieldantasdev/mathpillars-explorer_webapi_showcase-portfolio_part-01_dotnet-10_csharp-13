@@ -49,21 +49,14 @@ public class ProbabilidadeControlador : ControllerBase
     }
 
     [HttpPost("entropia-cruzada")]
-    public ActionResult<ResultadoEntropiaCruzada> PostCalcularEntropia([FromBody] dynamic req)
+    public ActionResult<ResultadoEntropiaCruzada> PostCalcularEntropia([FromBody] RequisicaoEntropiaCruzada req)
     {
-        double[] real = new[] { 1.0, 0.0, 0.0 };
-        double[] pred = new[] { 0.7, 0.2, 0.1 };
-        return Ok(_entropiaServico.Calcular(real, pred));
+        return Ok(_entropiaServico.Calcular(req.Real, req.Predito));
     }
 
     [HttpPost("markov")]
-    public ActionResult<ResultadoMarkov> PostSimularMarkov([FromBody] dynamic req)
+    public ActionResult<ResultadoMarkov> PostSimularMarkov([FromBody] RequisicaoMarkov req)
     {
-        // Exemplo: 2 estados (S0: Sol, S1: Chuva)
-        var matriz = new double[][] {
-            new double[] { 0.7, 0.3 },
-            new double[] { 0.4, 0.6 }
-        };
-        return Ok(_markovServico.Simular(matriz, 100, 0));
+        return Ok(_markovServico.Simular(req.MatrizTransicao, req.Passos, req.EstadoInicial));
     }
 }

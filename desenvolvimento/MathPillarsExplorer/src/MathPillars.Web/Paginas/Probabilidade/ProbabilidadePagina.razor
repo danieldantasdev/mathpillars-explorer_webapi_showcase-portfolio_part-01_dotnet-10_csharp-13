@@ -68,6 +68,10 @@ else if (ExperimentoAtivo == "Entropia")
 
     <div class="cartao-premium">
         <h4>Laboratorio: Perda de Classificacao</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+            <div><label>Distribuicao Real (P) - ex: 1, 0, 0</label><input @bind="EntropiaRealTexto" class="input-premium" /></div>
+            <div><label>Predicao Modelo (Q) - ex: 0.7, 0.2, 0.1</label><input @bind="EntropiaPreditaTexto" class="input-premium" /></div>
+        </div>
         <button class="botao-primario" @onclick="CalcularEntropia">Calcular Loss</button>
         
         @if (resultadoEntropia != null)
@@ -89,8 +93,16 @@ else if (ExperimentoAtivo == "Markov")
     </PainelTeoria>
 
     <div class="cartao-premium">
-        <h4>Laboratorio: Processos Estocasticos</h4>
-        <button class="botao-primario" @onclick="SimularMarkov">Simular 100 Passos</button>
+        <h4>Laboratorio: Processos Estocasticos (2 Estados)</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+            <div><label>Estado 0 → 0</label><input type="number" step="0.1" @bind="M00" class="input-premium" /></div>
+            <div><label>Estado 0 → 1</label><input type="number" step="0.1" @bind="M01" class="input-premium" /></div>
+            <div><label>Estado 1 → 0</label><input type="number" step="0.1" @bind="M10" class="input-premium" /></div>
+            <div><label>Estado 1 → 1</label><input type="number" step="0.1" @bind="M11" class="input-premium" /></div>
+            <div><label>Numero de Passos</label><input type="number" @bind="PassosMarkov" class="input-premium" /></div>
+            <div><label>Estado Inicial</label><input type="number" min="0" max="1" @bind="EstadoInicialMarkov" class="input-premium" /></div>
+        </div>
+        <button class="botao-primario" @onclick="SimularMarkov">Simular Processo</button>
         
         @if (resultadoMarkov != null)
         {
@@ -130,9 +142,13 @@ else if (ExperimentoAtivo == "Markov")
     private double Media = 0, Desvio = 1;
 
     // Entropia
+    private string EntropiaRealTexto = "1, 0, 0";
+    private string EntropiaPreditaTexto = "0.7, 0.2, 0.1";
     private ResultadoEntropiaCruzada? resultadoEntropia;
-
+    
     // Markov
+    private double M00 = 0.7, M01 = 0.3, M10 = 0.4, M11 = 0.6;
+    private int PassosMarkov = 100, EstadoInicialMarkov = 0;
     private ResultadoMarkov? resultadoMarkov;
 
     private async Task CalcularBayes()
@@ -155,14 +171,20 @@ else if (ExperimentoAtivo == "Markov")
 
     private async Task CalcularEntropia()
     {
-        resultadoEntropia = await Cliente.PostAsync<dynamic, ResultadoEntropiaCruzada>("api/probabilidade/entropia-cruzada", new { });
+        var p = EntropiaRealTexto.Split(',').Select(double.Parse).ToArray();
+        var q = EntropiaPreditaTexto.Split(',').Select(double.Parse).ToArray();
+        resultadoEntropia = await Cliente.PostAsync<RequisicaoEntropiaCruzada, ResultadoEntropiaCruzada>("api/probabilidade/entropia-cruzada", new(p, q));
         await Task.Delay(100);
         await JS.InvokeVoidAsync("renderizarMatematica");
     }
 
     private async Task SimularMarkov()
     {
-        resultadoMarkov = await Cliente.PostAsync<dynamic, ResultadoMarkov>("api/probabilidade/markov", new { });
+        var matriz = new double[][] {
+            new double[] { M00, M01 },
+            new double[] { M10, M11 }
+        };
+        resultadoMarkov = await Cliente.PostAsync<RequisicaoMarkov, ResultadoMarkov>("api/probabilidade/markov", new(matriz, PassosMarkov, EstadoInicialMarkov));
         await Task.Delay(100);
         await JS.InvokeVoidAsync("renderizarMatematica");
     }
