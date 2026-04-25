@@ -9,13 +9,14 @@
 <p style="color: var(--cor-texto-secundario); margin-bottom: 3rem;">Explorando gradientes, otimizacao e superficies de custo.</p>
 
 <div style="display: flex; gap: 1rem; margin-bottom: 2rem; overflow-x: auto; padding-bottom: 0.5rem;">
-    <button class="@(ExperimentoAtivo == "Landscape" ? "botao-primario" : "botao-secundario")" @onclick='() => ExperimentoAtivo = "Landscape"'>Loss Landscape</button>
     <button class="@(ExperimentoAtivo == "Gradiente" ? "botao-primario" : "botao-secundario")" @onclick='() => ExperimentoAtivo = "Gradiente"'>Gradiente</button>
     <button class="@(ExperimentoAtivo == "Jacobiana" ? "botao-primario" : "botao-secundario")" @onclick='() => ExperimentoAtivo = "Jacobiana"'>Jacobiana</button>
-    <button class="@(ExperimentoAtivo == "Otimizadores" ? "botao-primario" : "botao-secundario")" @onclick='() => ExperimentoAtivo = "Otimizadores"'>Otimizadores</button>
+    <button class="@(ExperimentoAtivo == "Hessiana" ? "botao-primario" : "botao-secundario")" @onclick='() => ExperimentoAtivo = "Hessiana"'>Hessiana</button>
+    <button class="@(ExperimentoAtivo == "Loss" ? "botao-primario" : "botao-secundario")" @onclick='() => ExperimentoAtivo = "Loss"'>Loss Landscape</button>
+    <button class="@(ExperimentoAtivo == "Otimizador" ? "botao-primario" : "botao-secundario")" @onclick='() => ExperimentoAtivo = "Otimizador"'>Otimizadores</button>
 </div>
 
-@if (ExperimentoAtivo == "Landscape")
+@if (ExperimentoAtivo == "Loss")
 {
     <PainelTeoria Titulo="Loss Landscapes e Otimizacao">
         <p>Em IA, visualizamos a funcao de erro como uma superficie. O objetivo e encontrar o ponto mais baixo.</p>
@@ -67,25 +68,57 @@ else if (ExperimentoAtivo == "Jacobiana")
     </PainelTeoria>
 
     <div class="cartao-premium">
-        <h4>Laboratorio: Linearizacao de Sistemas</h4>
+        <h4>Laboratorio: Diferenciacao Automatica (Jacobiana)</h4>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
             <div><label>Ponto X</label><input type="number" @bind="PontoJacobianaX" class="input-premium" /></div>
             <div><label>Ponto Y</label><input type="number" @bind="PontoJacobianaY" class="input-premium" /></div>
         </div>
-        <button class="botao-primario" @onclick="CalcularJacobiana">Computar Jacobiana</button>
+        <button class="botao-primario" @onclick="CalcularJacobiana">Computar Matriz</button>
         
         @if (resultadoJacobiana != null)
         {
             <div style="margin-top: 2rem;">
                 <div class="resultado-box-verde">
                     <h6>Matriz Jacobiana $J$</h6>
-                    <h3>@resultadoJacobiana.Linhas x @resultadoJacobiana.Colunas</h3>
+                    <div style="font-family: 'JetBrains Mono', monospace;">
+                        [@resultadoJacobiana.Elementos[0][0].ToString("F3") | @resultadoJacobiana.Elementos[0][1].ToString("F3")]<br/>
+                        [@resultadoJacobiana.Elementos[1][0].ToString("F3") | @resultadoJacobiana.Elementos[1][1].ToString("F3")]
+                    </div>
                 </div>
             </div>
         }
     </div>
 }
-else if (ExperimentoAtivo == "Otimizadores")
+else if (ExperimentoAtivo == "Hessiana")
+{
+    <PainelTeoria Titulo="Matriz Hessiana">
+        <p>A Hessiana e a matriz de segundas derivadas parciais, descrevendo a curvatura local de uma funcao.</p>
+        <div class="formula-matematica" style="text-align: center;">$$H = \begin{bmatrix} \frac{\partial^2 f}{\partial x^2} & \frac{\partial^2 f}{\partial x \partial y} \\ \frac{\partial^2 f}{\partial y \partial x} & \frac{\partial^2 f}{\partial y^2} \end{bmatrix}$$</div>
+    </PainelTeoria>
+
+    <div class="cartao-premium">
+        <h4>Laboratorio: Curvatura Local</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+            <div><label>Ponto X</label><input type="number" @bind="PontoHessianaX" class="input-premium" /></div>
+            <div><label>Ponto Y</label><input type="number" @bind="PontoHessianaY" class="input-premium" /></div>
+        </div>
+        <button class="botao-primario" @onclick="CalcularHessiana">Computar Hessiana</button>
+        
+        @if (resultadoHessiana != null)
+        {
+            <div style="margin-top: 2rem;">
+                <div class="resultado-box-verde">
+                    <h6>Matriz Hessiana $H$</h6>
+                    <div style="font-family: 'JetBrains Mono', monospace;">
+                        [@resultadoHessiana.Elementos[0][0].ToString("F3") | @resultadoHessiana.Elementos[0][1].ToString("F3")]<br/>
+                        [@resultadoHessiana.Elementos[1][0].ToString("F3") | @resultadoHessiana.Elementos[1][1].ToString("F3")]
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else if (ExperimentoAtivo == "Otimizador")
 {
     <PainelTeoria Titulo="AdamW vs Sophia">
         <p>Compare otimizadores de primeira ordem (AdamW) com otimizadores de segunda ordem (Sophia).</p>
@@ -134,7 +167,7 @@ else if (ExperimentoAtivo == "Otimizadores")
 </style>
 
 @code {
-    private string _experimentoAtivo = "Landscape";
+    private string _experimentoAtivo = "Loss";
     private string ExperimentoAtivo 
     { 
         get => _experimentoAtivo; 
@@ -154,8 +187,12 @@ else if (ExperimentoAtivo == "Otimizadores")
     private MathPillars.Comum.Primitivos.Vetor? vetorGradiente;
 
     // Jacobiana
-    private double PontoJacobianaX = 1.0, PontoJacobianaY = 1.0;
+    private double PontoJacobianaX = 1, PontoJacobianaY = 1;
     private MathPillars.Comum.Primitivos.Matriz? resultadoJacobiana;
+
+    // Hessiana
+    private double PontoHessianaX = 0, PontoHessianaY = 0;
+    private MathPillars.Comum.Primitivos.Matriz? resultadoHessiana;
 
     // Otimizadores
     private string FuncaoSelecionada = "Rosenbrock";
@@ -189,6 +226,13 @@ else if (ExperimentoAtivo == "Otimizadores")
     private async Task CalcularJacobiana()
     {
         resultadoJacobiana = await Cliente.PostAsync<RequisicaoJacobiana, MathPillars.Comum.Primitivos.Matriz>("api/calculo/jacobiana", new("sistema-base", new[] { PontoJacobianaX, PontoJacobianaY }));
+        await Task.Delay(100);
+        await JS.InvokeVoidAsync("renderizarMatematica");
+    }
+
+    private async Task CalcularHessiana()
+    {
+        resultadoHessiana = await Cliente.PostAsync<RequisicaoHessiana, MathPillars.Comum.Primitivos.Matriz>("api/calculo/hessiana", new("rosenbrock", new[] { PontoHessianaX, PontoHessianaY }));
         await Task.Delay(100);
         await JS.InvokeVoidAsync("renderizarMatematica");
     }

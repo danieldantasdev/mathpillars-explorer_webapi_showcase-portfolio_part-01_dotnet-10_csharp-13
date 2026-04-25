@@ -14,24 +14,43 @@ public class CalculoControlador : ControllerBase
     private readonly LossLandscapeServico _lossLandscapeServico;
     private readonly JacobianaServico _jacobianaServico;
     private readonly ComparadorOtimizadoresServico _comparadorServico;
+    private readonly HessianaServico _hessianaServico;
 
     public CalculoControlador(
         GradienteServico gradienteServico, 
         LossLandscapeServico lossLandscapeServico,
         JacobianaServico jacobianaServico,
-        ComparadorOtimizadoresServico comparadorServico)
+        ComparadorOtimizadoresServico comparadorServico,
+        HessianaServico hessianaServico)
     {
         _gradienteServico = gradienteServico;
         _lossLandscapeServico = lossLandscapeServico;
         _jacobianaServico = jacobianaServico;
         _comparadorServico = comparadorServico;
+        _hessianaServico = hessianaServico;
     }
 
     [HttpPost("gradiente")]
     public ActionResult<Vetor> PostCalcularGradiente([FromBody] RequisicaoGradiente requisicao)
     {
         var ponto = new Vetor(requisicao.Ponto);
-        return Ok(_gradienteServico.CalcularGradiente(p => p.Sum(x => x * x), ponto));
+        return Ok(_gradienteServico.CalcularGradiente(GetFuncao(requisicao.FuncaoNome), ponto));
+    }
+
+    [HttpPost("hessiana")]
+    public ActionResult<Matriz> PostCalcularHessiana([FromBody] RequisicaoHessiana requisicao)
+    {
+        var ponto = new Vetor(requisicao.Ponto);
+        return Ok(_hessianaServico.CalcularHessiana(GetFuncao(requisicao.FuncaoNome), ponto));
+    }
+
+    private Func<double[], double> GetFuncao(string nome)
+    {
+        return nome.ToLower() switch
+        {
+            "rosenbrock" => p => Math.Pow(1 - p[0], 2) + 100 * Math.Pow(p[1] - p[0] * p[0], 2),
+            _ => p => p.Sum(x => x * x)
+        };
     }
 
     [HttpGet("loss-landscape/stream")]

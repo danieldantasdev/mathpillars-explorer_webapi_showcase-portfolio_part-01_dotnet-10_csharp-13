@@ -29,12 +29,14 @@ builder.Services.AddScoped<GradienteServico>();
 builder.Services.AddScoped<JacobianaServico>();
 builder.Services.AddScoped<LossLandscapeServico>();
 builder.Services.AddScoped<ComparadorOtimizadoresServico>();
+builder.Services.AddScoped<HessianaServico>();
 
 // Injeção de Dependência - Módulo Probabilidade
 builder.Services.AddScoped<BayesServico>();
 builder.Services.AddScoped<GaussianaServico>();
 builder.Services.AddScoped<EntropiaCruzadaServico>();
 builder.Services.AddScoped<MarkovServico>();
+builder.Services.AddScoped<PoissonServico>();
 
 var app = builder.Build();
 

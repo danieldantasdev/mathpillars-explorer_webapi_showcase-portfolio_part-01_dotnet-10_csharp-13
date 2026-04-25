@@ -11,10 +11,12 @@ public record RequisicaoAutovetores(double[][] Elementos, int Dimensao);
 public record RequisicaoGradiente(string FuncaoNome, double[] Ponto);
 public record RequisicaoLossLandscape(string FuncaoNome, double MinX, double MaxX, double MinY, double MaxY);
 public record RequisicaoJacobiana(string SistemaNome, double[] Ponto);
+public record RequisicaoHessiana(string FuncaoNome, double[] Ponto);
 public record RequisicaoComparacaoOtimizadores(string FuncaoNome, double XInicial, double YInicial, double LearningRate, int Iteracoes);
 
 // Probabilidade
 public record RequisicaoBayes(double PriorH, double VerossimilhancaEH, double VerossimilhancaENaoH);
 public record RequisicaoGaussiana(double Media, double DesvioPadrao, double Min, double Max, int Pontos);
+public record RequisicaoPoisson(double Lambda, int K);
 public record RequisicaoEntropiaCruzada(double[] Real, double[] Predito);
 public record RequisicaoMarkov(double[][] MatrizTransicao, int Passos, int EstadoInicial);

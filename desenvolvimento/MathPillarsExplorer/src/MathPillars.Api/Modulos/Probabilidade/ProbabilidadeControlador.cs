@@ -14,17 +14,26 @@ public class ProbabilidadeControlador : ControllerBase
     private readonly GaussianaServico _gaussianaServico;
     private readonly EntropiaCruzadaServico _entropiaServico;
     private readonly MarkovServico _markovServico;
+    private readonly PoissonServico _poissonServico;
 
     public ProbabilidadeControlador(
         BayesServico bayesServico, 
         GaussianaServico gaussianaServico,
         EntropiaCruzadaServico entropiaServico,
-        MarkovServico markovServico)
+        MarkovServico markovServico,
+        PoissonServico poissonServico)
     {
         _bayesServico = bayesServico;
         _gaussianaServico = gaussianaServico;
         _entropiaServico = entropiaServico;
         _markovServico = markovServico;
+        _poissonServico = poissonServico;
+    }
+
+    [HttpPost("poisson")]
+    public ActionResult<double> PostCalcularPoisson([FromBody] RequisicaoPoisson req)
+    {
+        return Ok(_poissonServico.CalcularProbabilidade(req.Lambda, req.K));
     }
 
     [HttpPost("bayes")]
