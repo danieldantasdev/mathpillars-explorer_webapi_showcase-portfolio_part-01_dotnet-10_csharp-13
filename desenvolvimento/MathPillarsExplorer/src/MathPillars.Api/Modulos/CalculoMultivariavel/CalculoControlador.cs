@@ -6,20 +6,25 @@ using MathPillars.Api.Compartilhado;
 
 namespace MathPillars.Api.Modulos.CalculoMultivariavel;
 
-/// <summary>
-/// Controlador responsavel por receber e rotear requisicoes do modulo de Calculo Multivariavel.
-/// </summary>
 [ApiController]
 [Route("api/calculo")]
 public class CalculoControlador : ControllerBase
 {
     private readonly GradienteServico _gradienteServico;
     private readonly LossLandscapeServico _lossLandscapeServico;
+    private readonly JacobianaServico _jacobianaServico;
+    private readonly ComparadorOtimizadoresServico _comparadorServico;
 
-    public CalculoControlador(GradienteServico gradienteServico, LossLandscapeServico lossLandscapeServico)
+    public CalculoControlador(
+        GradienteServico gradienteServico, 
+        LossLandscapeServico lossLandscapeServico,
+        JacobianaServico jacobianaServico,
+        ComparadorOtimizadoresServico comparadorServico)
     {
         _gradienteServico = gradienteServico;
         _lossLandscapeServico = lossLandscapeServico;
+        _jacobianaServico = jacobianaServico;
+        _comparadorServico = comparadorServico;
     }
 
     [HttpPost("gradiente")]
@@ -38,12 +43,17 @@ public class CalculoControlador : ControllerBase
         [FromQuery] double maxY)
     {
         Response.Headers.Append("Content-Type", "text/event-stream");
-        Response.Headers.Append("Cache-Control", "no-cache");
-        Response.Headers.Append("Connection", "keep-alive");
-
         await foreach (var evento in _lossLandscapeServico.GerarSuperficieComStreamingSSE(funcaoNome, minX, maxX, minY, maxY))
         {
             await SSEHelper.EscreverEventoAsync(Response, evento);
         }
+    }
+
+    [HttpPost("jacobiana")]
+    public ActionResult<Matriz> PostCalcularJacobiana([FromBody] dynamic requisicao)
+    {
+        // Simplificado para teste: funcao f(x,y) = [x^2 + y, y^2 + x]
+        var ponto = new Vetor(new double[] { 1.0, 1.0 });
+        return Ok(_jacobianaServico.CalcularJacobiana(p => new double[] { p[0] * p[0] + p[1], p[1] * p[1] + p[0] }, ponto));
     }
 }

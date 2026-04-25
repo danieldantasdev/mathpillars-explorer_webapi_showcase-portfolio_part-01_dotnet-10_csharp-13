@@ -81,4 +81,28 @@ public class AlgebraLinearControlador : ControllerBase
         var matriz = new Matriz(requisicao.Elementos);
         return Ok(_autovetoresServico.CalcularAutovetoresEAutovalores(matriz));
     }
+
+    [HttpGet("pca/stream")]
+    public async Task GetCalcularPCA(
+        [FromQuery] int linhas,
+        [FromQuery] int colunas,
+        [FromQuery] string elementosJson,
+        [FromQuery] int componentes)
+    {
+        Response.Headers.Append("Content-Type", "text/event-stream");
+        var elementos = System.Text.Json.JsonSerializer.Deserialize<double[]>(elementosJson)!;
+        var dados = new double[linhas][];
+        for (var i = 0; i < linhas; i++)
+        {
+            dados[i] = new double[colunas];
+            for (var j = 0; j < colunas; j++)
+                dados[i][j] = elementos[i * colunas + j];
+        }
+
+        await foreach (var evento in _pcaServico.CalcularPCAComStreamingSSE(dados, componentes))
+        {
+            await SSEHelper.EscreverEventoAsync(Response, evento);
+        }
+    }
 }
+

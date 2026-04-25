@@ -69,6 +69,39 @@
                 console.error("Erro ao renderizar Plotly:", e);
             }
         };
+
+        window.renderizarGrafico2D = (idElemento, pontos) => {
+            try {
+                const el = document.getElementById(idElemento);
+                if (!el) return;
+
+                const x = pontos.map(p => p.x);
+                const y = pontos.map(p => p.y);
+
+                const dados = [{
+                    x: x,
+                    y: y,
+                    type: 'scatter',
+                    mode: 'lines',
+                    fill: 'tozeroy',
+                    line: { color: '#0066FF', width: 3 },
+                    fillcolor: 'rgba(0, 102, 255, 0.1)'
+                }];
+
+                const layout = {
+                    margin: { l: 40, r: 20, b: 40, t: 20 },
+                    paper_bgcolor: 'rgba(0,0,0,0)',
+                    plot_bgcolor: 'rgba(0,0,0,0)',
+                    xaxis: { gridcolor: '#eee', zeroline: true },
+                    yaxis: { gridcolor: '#eee', zeroline: true }
+                };
+
+                Plotly.newPlot(idElemento, dados, layout, { responsive: true, displayModeBar: false });
+            } catch (e) {
+                console.error("Erro ao renderizar Plotly 2D:", e);
+            }
+        };
+
     </script>
 </head>
 

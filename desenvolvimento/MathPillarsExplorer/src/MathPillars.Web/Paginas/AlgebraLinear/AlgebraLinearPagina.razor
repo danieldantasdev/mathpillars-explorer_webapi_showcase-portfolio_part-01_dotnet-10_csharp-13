@@ -9,173 +9,237 @@
 <h1 style="margin-bottom: 0.5rem;">Algebra Linear</h1>
 <p style="color: var(--cor-texto-secundario); margin-bottom: 3rem;">Fundamentos de vetores, matrizes e decomposicoes para Inteligencia Artificial.</p>
 
-<PainelTeoria Titulo="Decomposicao em Valores Singulares (SVD)">
-    <p>A SVD e uma das ferramentas mais poderosas da algebra linear, permitindo a fatoracao de qualquer matriz $A_{m \times n}$ em:</p>
-    <div class="formula-matematica" style="text-align: center;">
-        $$A = U \Sigma V^T$$
-    </div>
-    <div style="margin-top: 1rem; font-size: 0.9rem; color: var(--cor-texto-secundario);">
-        <p>Regra de dimensoes:</p>
-        <ul>
-            <li>$U$ (Matriz Ortogonal): $m \times m$</li>
-            <li>$\Sigma$ (Matriz Diagonal): $m \times n$ (mesmo tamanho de $A$)</li>
-            <li>$V^T$ (Matriz Ortogonal): $n \times n$</li>
-        </ul>
-    </div>
-</PainelTeoria>
-
-<div class="cartao-premium">
-    <h4>Experimento: Decomposicao SVD Dinamica</h4>
-    <p style="font-size: 0.85rem; color: var(--cor-texto-secundario); margin: 1rem 0;">Defina as dimensoes e os elementos da matriz para visualizar a decomposicao em tempo real.</p>
-    
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; max-width: 400px;">
-        <div>
-            <label style="display: block; font-size: 0.8rem; margin-bottom: 0.5rem; font-weight: 600;">Linhas (m)</label>
-            <input type="number" min="1" max="5" @bind="NumLinhas" @bind:event="oninput" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--cor-borda);" />
-        </div>
-        <div>
-            <label style="display: block; font-size: 0.8rem; margin-bottom: 0.5rem; font-weight: 600;">Colunas (n)</label>
-            <input type="number" min="1" max="5" @bind="NumColunas" @bind:event="oninput" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--cor-borda);" />
-        </div>
-    </div>
-
-    <div style="margin-bottom: 2rem;">
-        <label style="display: block; font-size: 0.8rem; margin-bottom: 1rem; font-weight: 600;">Elementos da Matriz $A_{@NumLinhas \times @NumColunas}$</label>
-        <div style="display: grid; grid-template-columns: repeat(@NumColunas, 1fr); gap: 0.75rem; max-width: @(NumColunas * 100)px;">
-            @for (int i = 0; i < NumLinhas * NumColunas; i++)
-            {
-                var indice = i;
-                <input type="number" step="0.1" @bind="ElementosMatriz[indice]" style="width: 100%; padding: 0.5rem; border-radius: 6px; border: 1px solid var(--cor-borda); text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;" />
-            }
-        </div>
-    </div>
-
-    <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
-        <button class="botao-primario" @onclick="IniciarSVD" disabled="@Calculando">
-            @(Calculando ? "Processando..." : "Iniciar Decomposicao (SSE)")
-        </button>
-    </div>
-
-    <ProgressoSSE Visivel="@Calculando" Percentual="@Progresso" Mensagem="@Mensagem" />
-
-    @if (Resultado != null)
-    {
-        <div style="margin-top: 2rem;">
-            <h5 style="margin-bottom: 1.5rem;">Resultados da Decomposicao</h5>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
-                
-                <div class="cartao-premium" style="background-color: var(--cor-sucesso); color: white; border: none;">
-                    <h6 style="margin-bottom: 0.5rem; opacity: 0.9;">Matriz $U$</h6>
-                    <h3 style="margin: 0;">@Resultado.MatrizU.Linhas x @Resultado.MatrizU.Colunas</h3>
-                    <p style="font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.8;">Ortogonal (m x m)</p>
-                </div>
-
-                <div class="cartao-premium" style="background-color: var(--cor-sucesso); color: white; border: none;">
-                    <h6 style="margin-bottom: 0.5rem; opacity: 0.9;">Matriz $\Sigma$</h6>
-                    <h3 style="margin: 0;">@Resultado.MatrizSigma.Linhas x @Resultado.MatrizSigma.Colunas</h3>
-                    <p style="font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.8;">Diagonal (m x n)</p>
-                </div>
-
-                <div class="cartao-premium" style="background-color: var(--cor-sucesso); color: white; border: none;">
-                    <h6 style="margin-bottom: 0.5rem; opacity: 0.9;">Matriz $V^T$</h6>
-                    <h3 style="margin: 0;">@Resultado.MatrizVTransposta.Linhas x @Resultado.MatrizVTransposta.Colunas</h3>
-                    <p style="font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.8;">Ortogonal (n x n)</p>
-                </div>
-
-                <div class="cartao-premium" style="background-color: var(--cor-primaria-suave); border: none;">
-                    <h6 style="margin-bottom: 0.5rem; color: var(--cor-primaria);">Valores Singulares ($\sigma$)</h6>
-                    <p style="font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; font-weight: 600; color: var(--cor-texto-principal); margin-top: 0.5rem;">
-                        @string.Join(", ", Resultado.ValoresSingulares.Select(v => v.ToString("F3")))
-                    </p>
-                    <p style="font-size: 0.75rem; margin-top: 0.5rem; color: var(--cor-texto-secundario);">Importancia de cada componente.</p>
-                </div>
-
-            </div>
-        </div>
-    }
+<div style="display: flex; gap: 1rem; margin-bottom: 2rem; overflow-x: auto; padding-bottom: 0.5rem;">
+    <button class="@(ExperimentoAtivo == "SVD" ? "botao-primario" : "botao-secundario")" @onclick='() => ExperimentoAtivo = "SVD"'>SVD</button>
+    <button class="@(ExperimentoAtivo == "PCA" ? "botao-primario" : "botao-secundario")" @onclick='() => ExperimentoAtivo = "PCA"'>PCA</button>
+    <button class="@(ExperimentoAtivo == "Similaridade" ? "botao-primario" : "botao-secundario")" @onclick='() => ExperimentoAtivo = "Similaridade"'>Similaridade</button>
+    <button class="@(ExperimentoAtivo == "Autovetores" ? "botao-primario" : "botao-secundario")" @onclick='() => ExperimentoAtivo = "Autovetores"'>Autovetores</button>
 </div>
 
+@if (ExperimentoAtivo == "SVD")
+{
+    <PainelTeoria Titulo="Decomposicao em Valores Singulares (SVD)">
+        <p>A SVD e uma das ferramentas mais poderosas da algebra linear, permitindo a fatoracao de qualquer matriz $A_{m \times n}$.</p>
+        <div class="formula-matematica" style="text-align: center;">$A = U \Sigma V^T$</div>
+    </PainelTeoria>
+
+    <div class="cartao-premium">
+        <h4>Laboratorio: SVD Dinamico</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; max-width: 400px;">
+            <div>
+                <label>Linhas (m)</label>
+                <input type="number" min="1" max="5" @bind="NumLinhas" @bind:event="oninput" class="input-premium" />
+            </div>
+            <div>
+                <label>Colunas (n)</label>
+                <input type="number" min="1" max="5" @bind="NumColunas" @bind:event="oninput" class="input-premium" />
+            </div>
+        </div>
+
+        <div style="margin-bottom: 2rem;">
+            <label>Elementos da Matriz $A$</label>
+            <div style="display: grid; grid-template-columns: repeat(@NumColunas, 1fr); gap: 0.75rem; max-width: @(NumColunas * 100)px;">
+                @for (int i = 0; i < NumLinhas * NumColunas; i++)
+                {
+                    var indice = i;
+                    <input type="number" step="0.1" @bind="ElementosMatriz[indice]" class="input-premium-mini" />
+                }
+            </div>
+        </div>
+
+        <button class="botao-primario" @onclick="ExecutarSVD" disabled="@Calculando">Executar SVD</button>
+        <ProgressoSSE Visivel="@Calculando" Percentual="@Progresso" Mensagem="@Mensagem" />
+
+        @if (resultadoSVD != null)
+        {
+            <div style="margin-top: 2rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
+                <div class="resultado-box-verde"><h6>Matriz U</h6><h3>@resultadoSVD.MatrizU.Linhas x @resultadoSVD.MatrizU.Colunas</h3></div>
+                <div class="resultado-box-verde"><h6>Matriz Σ</h6><h3>@resultadoSVD.MatrizSigma.Linhas x @resultadoSVD.MatrizSigma.Colunas</h3></div>
+                <div class="resultado-box-verde"><h6>Matriz Vᵀ</h6><h3>@resultadoSVD.MatrizVTransposta.Linhas x @resultadoSVD.MatrizVTransposta.Colunas</h3></div>
+            </div>
+        }
+    </div>
+}
+else if (ExperimentoAtivo == "PCA")
+{
+    <PainelTeoria Titulo="Analise de Componentes Principais (PCA)">
+        <p>PCA e usada para reducao de dimensionalidade, projetando dados em eixos que maximizam a variancia.</p>
+    </PainelTeoria>
+
+    <div class="cartao-premium">
+        <h4>Laboratorio: PCA em Dados Customizados</h4>
+        <div style="margin-bottom: 2rem;">
+            <label>Dimensoes Alvo</label>
+            <input type="number" min="1" max="5" @bind="ComponentesPCA" class="input-premium" style="max-width: 200px;" />
+        </div>
+        <button class="botao-primario" @onclick="ExecutarPCA" disabled="@Calculando">Calcular PCA</button>
+        <ProgressoSSE Visivel="@Calculando" Percentual="@Progresso" Mensagem="@Mensagem" />
+        
+        @if (resultadoPCA != null)
+        {
+            <div style="margin-top: 2rem;">
+                <div class="resultado-box-verde">
+                    <h6>Variancia Explicada Acumulada</h6>
+                    <h3>@(resultadoPCA.VarianciaExplicadaAcumulada.Last().ToString("P2"))</h3>
+                </div>
+            </div>
+        }
+    </div>
+}
+else if (ExperimentoAtivo == "Similaridade")
+{
+    <PainelTeoria Titulo="Similaridade de Cosseno">
+        <p>Mede o cosseno do angulo entre dois vetores. Muito usado em NLP para comparar embeddings.</p>
+        <div class="formula-matematica">$\cos(\theta) = \frac{A \cdot B}{\|A\| \|B\|}$</div>
+    </PainelTeoria>
+
+    <div class="cartao-premium">
+        <h4>Laboratorio: Comparador de Vetores</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+            <div>
+                <label>Vetor A (separado por virgula)</label>
+                <input @bind="VetorATexto" class="input-premium" placeholder="1, 0, 0" />
+            </div>
+            <div>
+                <label>Vetor B (separado por virgula)</label>
+                <input @bind="VetorBTexto" class="input-premium" placeholder="0.9, 0.1, 0" />
+            </div>
+        </div>
+        <button class="botao-primario" style="margin-top: 2rem;" @onclick="ExecutarSimilaridade">Calcular Similaridade</button>
+        
+        @if (resultadoSimilaridade != null)
+        {
+            <div style="margin-top: 2rem;">
+                <div class="resultado-box-verde">
+                    <h6>Similaridade de Cosseno</h6>
+                    <h3>@resultadoSimilaridade.Valor.ToString("F4")</h3>
+                    <p>@(resultadoSimilaridade.Valor > 0.8 ? "Vetores muito parecidos" : "Vetores distintos")</p>
+                </div>
+            </div>
+        }
+    </div>
+}
+else if (ExperimentoAtivo == "Autovetores")
+{
+    <PainelTeoria Titulo="Autovetores e Autovalores">
+        <p>Analise a estrutura de uma matriz quadrada $A$ atraves de seus eixos de estiramento.</p>
+        <div class="formula-matematica">$Ax = \lambda x$</div>
+    </PainelTeoria>
+
+    <div class="cartao-premium">
+        <h4>Laboratorio: Eigendecomposition</h4>
+        <label>Dimensao da Matriz Quadrada</label>
+        <input type="number" min="2" max="4" @bind="DimensaoMatriz" class="input-premium" style="max-width: 100px; margin-bottom: 2rem;" />
+        
+        <button class="botao-primario" @onclick="ExecutarAutovetores">Calcular Autovalores</button>
+        
+        @if (resultadoAutovetores != null)
+        {
+            <div style="margin-top: 2rem;">
+                <div class="resultado-box-verde">
+                    <h6>Autovalores Encontrados</h6>
+                    <h3>@string.Join(" | ", resultadoAutovetores.Autovalores.Select(v => v.ToString("F2")))</h3>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<style>
+    .input-premium { width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--cor-borda); background: white; }
+    .input-premium-mini { width: 100%; padding: 0.5rem; border-radius: 6px; border: 1px solid var(--cor-borda); text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; }
+    .resultado-box-verde { background-color: var(--cor-sucesso); color: white; padding: 1.5rem; border-radius: 12px; }
+    .resultado-box-verde h6 { margin: 0 0 0.5rem 0; opacity: 0.9; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
+    .resultado-box-verde h3 { margin: 0; font-weight: 700; }
+    .botao-secundario { background: transparent; border: 1px solid var(--cor-borda); padding: 0.6rem 1.2rem; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+    .botao-secundario:hover { background: var(--cor-primaria-suave); border-color: var(--cor-primaria); }
+</style>
+
 @code {
-    private int _numLinhas = 2;
-    private int _numColunas = 3;
-
-    private int NumLinhas 
-    { 
-        get => _numLinhas; 
-        set { if (value >= 1 && value <= 5) { _numLinhas = value; AtualizarMatriz(); } } 
-    }
-
-    private int NumColunas 
-    { 
-        get => _numColunas; 
-        set { if (value >= 1 && value <= 5) { _numColunas = value; AtualizarMatriz(); } } 
-    }
-
-    private double[] ElementosMatriz = new double[6] { 1, 2, 3, 4, 5, 6 };
-
+    private string ExperimentoAtivo = "SVD";
     private bool Calculando = false;
     private int Progresso = 0;
     private string Mensagem = "";
-    private ResultadoSVD? Resultado;
     private CancellationTokenSource? _cts;
+
+    // SVD
+    private int _numLinhas = 2;
+    private int _numColunas = 3;
+    private int NumLinhas { get => _numLinhas; set { _numLinhas = value; AtualizarMatriz(); } }
+    private int NumColunas { get => _numColunas; set { _numColunas = value; AtualizarMatriz(); } }
+    private double[] ElementosMatriz = new double[6] { 1, 2, 3, 4, 5, 6 };
+    private ResultadoSVD? resultadoSVD;
+
+    // PCA
+    private int ComponentesPCA = 2;
+    private ResultadoPCA? resultadoPCA;
+
+    // Similaridade
+    private string VetorATexto = "1, 0, 0";
+    private string VetorBTexto = "0.8, 0.6, 0";
+    private Escalar? resultadoSimilaridade;
+
+    // Autovetores
+    private int DimensaoMatriz = 2;
+    private ResultadoAutovetores? resultadoAutovetores;
 
     private void AtualizarMatriz()
     {
         var novoTamanho = _numLinhas * _numColunas;
         var novaLista = new double[novoTamanho];
-        for (int i = 0; i < Math.Min(novoTamanho, ElementosMatriz.Length); i++)
-        {
-            novaLista[i] = ElementosMatriz[i];
-        }
+        for (int i = 0; i < Math.Min(novoTamanho, ElementosMatriz.Length); i++) novaLista[i] = ElementosMatriz[i];
         ElementosMatriz = novaLista;
+    }
+
+    private async Task ExecutarSVD()
+    {
+        Calculando = true; resultadoSVD = null; Progresso = 0;
+        var json = System.Text.Json.JsonSerializer.Serialize(ElementosMatriz);
+        var url = $"api/algebra-linear/svd/stream?linhas={NumLinhas}&colunas={NumColunas}&elementosJson={json}";
+        await foreach (var ev in Cliente.ObterStreamSSE<ResultadoSSE<ResultadoSVD>>(url))
+        {
+            Progresso = ev.ProgressoPercentual; Mensagem = ev.MensagemProgresso;
+            if (ev.Concluido) resultadoSVD = ev.DadosParciais;
+            StateHasChanged();
+        }
+        Calculando = false;
+    }
+
+    private async Task ExecutarPCA()
+    {
+        Calculando = true; resultadoPCA = null;
+        var json = System.Text.Json.JsonSerializer.Serialize(ElementosMatriz);
+        var url = $"api/algebra-linear/pca/stream?linhas={NumLinhas}&colunas={NumColunas}&elementosJson={json}&componentes={ComponentesPCA}";
+        await foreach (var ev in Cliente.ObterStreamSSE<ResultadoSSE<ResultadoPCA>>(url))
+        {
+            Progresso = ev.ProgressoPercentual; Mensagem = ev.MensagemProgresso;
+            if (ev.Concluido) resultadoPCA = ev.DadosParciais;
+            StateHasChanged();
+        }
+        Calculando = false;
+    }
+
+    private async Task ExecutarSimilaridade()
+    {
+        var vA = VetorATexto.Split(',').Select(double.Parse).ToArray();
+        var vB = VetorBTexto.Split(',').Select(double.Parse).ToArray();
+        resultadoSimilaridade = await Cliente.PostAsync<RequisicaoSimilaridade, Escalar>("api/algebra-linear/similaridade-cosseno", new(vA, vB));
+    }
+
+    private async Task ExecutarAutovetores()
+    {
+        // Simplificado: usa a matriz atual (truncada para quadrada)
+        var n = DimensaoMatriz;
+        var elementos = new double[n][];
+        for(int i=0; i<n; i++) {
+            elementos[i] = new double[n];
+            for(int j=0; j<n; j++) elementos[i][j] = (i*n+j < ElementosMatriz.Length) ? ElementosMatriz[i*n+j] : 0;
+        }
+        resultadoAutovetores = await Cliente.PostAsync<RequisicaoAutovetores, ResultadoAutovetores>("api/algebra-linear/autovetores", new(elementos, n));
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender || !Calculando)
-        {
-            await JS.InvokeVoidAsync("renderizarMatematica");
-        }
-    }
-
-    private async Task IniciarSVD()
-    {
-        _cts?.Cancel();
-        _cts = new CancellationTokenSource();
-
-        Calculando = true;
-        Resultado = null;
-        Progresso = 0;
-        Mensagem = "Iniciando conexao SSE...";
-        StateHasChanged();
-
-        var json = System.Text.Json.JsonSerializer.Serialize(ElementosMatriz);
-        var url = $"api/algebra-linear/svd/stream?linhas={NumLinhas}&colunas={NumColunas}&elementosJson={json}";
-
-        try
-        {
-            await foreach (var evento in Cliente.ObterStreamSSE<ResultadoSSE<ResultadoSVD>>(url).WithCancellation(_cts.Token))
-            {
-                Progresso = evento.ProgressoPercentual;
-                Mensagem = evento.MensagemProgresso;
-                
-                if (evento.Concluido && evento.DadosParciais != null)
-                {
-                    Resultado = evento.DadosParciais;
-                }
-                
-                StateHasChanged();
-            }
-        }
-        catch (OperationCanceledException) { }
-        catch (Exception ex)
-        {
-            Mensagem = "Erro: " + ex.Message;
-        }
-        finally
-        {
-            Calculando = false;
-            StateHasChanged();
-        }
+        if (firstRender) await JS.InvokeVoidAsync("renderizarMatematica");
     }
 }

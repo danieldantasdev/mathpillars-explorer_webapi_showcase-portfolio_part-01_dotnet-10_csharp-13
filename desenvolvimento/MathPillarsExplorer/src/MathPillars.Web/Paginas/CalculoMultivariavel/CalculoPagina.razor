@@ -8,116 +8,125 @@
 <h1 style="margin-bottom: 0.5rem;">Calculo Multivariavel</h1>
 <p style="color: var(--cor-texto-secundario); margin-bottom: 3rem;">Explorando gradientes, otimizacao e superficies de custo.</p>
 
-<PainelTeoria Titulo="Loss Landscapes e Otimizacao">
-    <p>Em Aprendizado de Maquina, otimizar um modelo significa encontrar o minimo de uma funcao de custo (Loss Function). Esta funcao pode ser visualizada como uma paisagem em 3D.</p>
-    <div class="formula-matematica" style="text-align: center;">
-        $$f(x, y) = (1 - x)^2 + 100(y - x^2)^2$$
-    </div>
-    <p style="margin-top: 1rem;">A funcao acima e a de **Rosenbrock**, famosa por seu vale estreito e curvo onde o minimo global ($1, 1$) e dificil de encontrar para muitos algoritmos.</p>
-</PainelTeoria>
-
-<div class="cartao-premium">
-    <h4>Experimento: Geracao de Loss Landscape Dinamica</h4>
-    <p style="font-size: 0.85rem; color: var(--cor-texto-secundario); margin: 1rem 0;">Ajuste os limites do dominio para visualizar diferentes regioes da funcao de Rosenbrock.</p>
-    
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-        <div>
-            <label style="display: block; font-size: 0.8rem; margin-bottom: 0.5rem; font-weight: 600;">X Minimo</label>
-            <input type="number" step="0.1" @bind="MinX" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--cor-borda);" />
-        </div>
-        <div>
-            <label style="display: block; font-size: 0.8rem; margin-bottom: 0.5rem; font-weight: 600;">X Maximo</label>
-            <input type="number" step="0.1" @bind="MaxX" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--cor-borda);" />
-        </div>
-        <div>
-            <label style="display: block; font-size: 0.8rem; margin-bottom: 0.5rem; font-weight: 600;">Y Minimo</label>
-            <input type="number" step="0.1" @bind="MinY" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--cor-borda);" />
-        </div>
-        <div>
-            <label style="display: block; font-size: 0.8rem; margin-bottom: 0.5rem; font-weight: 600;">Y Maximo</label>
-            <input type="number" step="0.1" @bind="MaxY" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--cor-borda);" />
-        </div>
-    </div>
-
-    <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
-        <button class="botao-primario" @onclick="GerarSuperficie" disabled="@Calculando">
-            @(Calculando ? "Calculando..." : "Gerar Superficie 3D (SSE)")
-        </button>
-    </div>
-
-    <ProgressoSSE Visivel="@Calculando" Percentual="@Progresso" Mensagem="@Mensagem" />
-
-    @if (Pontos != null)
-    {
-        <div style="margin-top: 2rem;">
-            <div id="grafico-loss-landscape" style="width: 100%; height: 600px; border-radius: 12px; overflow: hidden; background: #f8f9fa;"></div>
-            <p style="font-size: 0.8rem; color: var(--cor-texto-secundario); margin-top: 1rem; text-align: center;">
-                Superficie gerada com @Pontos.Length pontos. Visualizacao 3D interativa via Plotly.js.
-            </p>
-        </div>
-    }
+<div style="display: flex; gap: 1rem; margin-bottom: 2rem; overflow-x: auto; padding-bottom: 0.5rem;">
+    <button class="@(ExperimentoAtivo == "Landscape" ? "botao-primario" : "botao-secundario")" @onclick='() => ExperimentoAtivo = "Landscape"'>Loss Landscape</button>
+    <button class="@(ExperimentoAtivo == "Gradiente" ? "botao-primario" : "botao-secundario")" @onclick='() => ExperimentoAtivo = "Gradiente"'>Gradiente</button>
+    <button class="@(ExperimentoAtivo == "Jacobiana" ? "botao-primario" : "botao-secundario")" @onclick='() => ExperimentoAtivo = "Jacobiana"'>Jacobiana</button>
+    <button class="@(ExperimentoAtivo == "Otimizadores" ? "botao-primario" : "botao-secundario")" @onclick='() => ExperimentoAtivo = "Otimizadores"'>Otimizadores</button>
 </div>
 
-@code {
-    private double MinX = -2.0;
-    private double MaxX = 2.0;
-    private double MinY = -1.0;
-    private double MaxY = 3.0;
+@if (ExperimentoAtivo == "Landscape")
+{
+    <PainelTeoria Titulo="Loss Landscapes e Otimizacao">
+        <p>Em IA, visualizamos a funcao de erro como uma superficie. O objetivo e encontrar o ponto mais baixo.</p>
+    </PainelTeoria>
 
-    private bool Calculando = false;
-    private int Progresso = 0;
-    private string Mensagem = "";
-    private PontoSuperficie3D[]? Pontos;
-    private CancellationTokenSource? _cts;
+    <div class="cartao-premium">
+        <h4>Laboratorio: Superficie de Custo</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+            <div><label>X Min</label><input type="number" @bind="MinX" class="input-premium" /></div>
+            <div><label>X Max</label><input type="number" @bind="MaxX" class="input-premium" /></div>
+            <div><label>Y Min</label><input type="number" @bind="MinY" class="input-premium" /></div>
+            <div><label>Y Max</label><input type="number" @bind="MaxY" class="input-premium" /></div>
+        </div>
+        <button class="botao-primario" @onclick="GerarSuperficie" disabled="@Calculando">Gerar Mapa 3D</button>
+        <div id="grafico-loss" style="height: 500px; width: 100%; margin-top: 2rem;"></div>
+    </div>
+}
+else if (ExperimentoAtivo == "Gradiente")
+{
+    <PainelTeoria Titulo="Gradiente Descendente">
+        <p>O gradiente aponta para a direcao de maior subida. Seguimos o oposto para minimizar.</p>
+        <div class="formula-matematica">$\theta_{t+1} = \theta_t - \eta \nabla J(\theta_t)$</div>
+    </PainelTeoria>
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender || !Calculando)
+    <div class="cartao-premium">
+        <h4>Laboratorio: Calculo de Inclinação Local</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div><label>Ponto X</label><input type="number" @bind="PontoX" class="input-premium" /></div>
+            <div><label>Ponto Y</label><input type="number" @bind="PontoY" class="input-premium" /></div>
+        </div>
+        <button class="botao-primario" style="margin-top: 1.5rem;" @onclick="CalcularGradiente">Calcular Vetor Gradiente</button>
+        
+        @if (vetorGradiente != null)
         {
-            await JS.InvokeVoidAsync("renderizarMatematica");
+            <div style="margin-top: 2rem;">
+                <div class="resultado-box-verde">
+                    <h6>Vetor Gradiente $\nabla f$</h6>
+                    <h3>[@string.Join(", ", vetorGradiente.Componentes.Select(c => c.ToString("F4")))]</h3>
+                </div>
+            </div>
         }
-    }
+    </div>
+}
+else if (ExperimentoAtivo == "Jacobiana")
+{
+    <PainelTeoria Titulo="Matriz Jacobiana">
+        <p>A Jacobiana e a generalizacao do gradiente para funcoes vetoriais, essencial no Backpropagation.</p>
+    </PainelTeoria>
+
+    <div class="cartao-premium">
+        <h4>Laboratorio: Linearizacao de Sistemas</h4>
+        <button class="botao-primario" @onclick="CalcularJacobiana">Computar Jacobiana</button>
+        
+        @if (resultadoJacobiana != null)
+        {
+            <div style="margin-top: 2rem;">
+                <div class="resultado-box-verde">
+                    <h6>Matriz Jacobiana $J$</h6>
+                    <h3>@resultadoJacobiana.Linhas x @resultadoJacobiana.Colunas</h3>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<style>
+    .input-premium { width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--cor-borda); background: white; }
+    .resultado-box-verde { background-color: var(--cor-sucesso); color: white; padding: 1.5rem; border-radius: 12px; }
+    .botao-secundario { background: transparent; border: 1px solid var(--cor-borda); padding: 0.6rem 1.2rem; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+    .botao-secundario:hover { background: var(--cor-primaria-suave); }
+</style>
+
+@code {
+    private string ExperimentoAtivo = "Landscape";
+    private bool Calculando = false;
+
+    // Landscape
+    private double MinX = -2, MaxX = 2, MinY = -1, MaxY = 3;
+
+    // Gradiente
+    private double PontoX = 1, PontoY = 1;
+    private MathPillars.Comum.Primitivos.Vetor? vetorGradiente;
+
+    // Jacobiana
+    private MathPillars.Comum.Primitivos.Matriz? resultadoJacobiana;
 
     private async Task GerarSuperficie()
     {
-        _cts?.Cancel();
-        _cts = new CancellationTokenSource();
-        
         Calculando = true;
-        Pontos = null;
-        Progresso = 0;
-        Mensagem = "Calculando topografia da superficie...";
-        StateHasChanged();
+        var url = $"api/calculo/loss-landscape/stream?funcaoNome=rosenbrock&minX={MinX}&maxX={MaxX}&minY={MinY}&maxY={MaxY}";
+        var pontos = new List<PontoSuperficie3D>();
+        await foreach (var ev in Cliente.ObterStreamSSE<ResultadoSSE<PontoSuperficie3D[]>>(url))
+        {
+            if (ev.DadosParciais != null) pontos.AddRange(ev.DadosParciais);
+        }
+        await JS.InvokeVoidAsync("renderizarGrafico3D", "grafico-loss", pontos);
+        Calculando = false;
+    }
 
-        var url = $"api/calculo/loss-landscape/stream?funcaoNome=rosenbrock&minX={MinX.ToString(System.Globalization.CultureInfo.InvariantCulture)}&maxX={MaxX.ToString(System.Globalization.CultureInfo.InvariantCulture)}&minY={MinY.ToString(System.Globalization.CultureInfo.InvariantCulture)}&maxY={MaxY.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
+    private async Task CalcularGradiente()
+    {
+        vetorGradiente = await Cliente.PostAsync<RequisicaoGradiente, MathPillars.Comum.Primitivos.Vetor>("api/calculo/gradiente", new("rosenbrock", new[] { PontoX, PontoY }));
+    }
 
-        try
-        {
-            await foreach (var evento in Cliente.ObterStreamSSE<ResultadoSSE<PontoSuperficie3D[]>>(url).WithCancellation(_cts.Token))
-            {
-                Progresso = evento.ProgressoPercentual;
-                Mensagem = evento.MensagemProgresso;
-                
-                if (evento.Concluido && evento.DadosParciais != null)
-                {
-                    Pontos = evento.DadosParciais;
-                    StateHasChanged();
-                    await Task.Delay(200); // Garantir render do div
-                    await JS.InvokeVoidAsync("renderizarGrafico3D", "grafico-loss-landscape", Pontos);
-                }
-                
-                StateHasChanged();
-            }
-        }
-        catch (OperationCanceledException) { }
-        catch (Exception ex)
-        {
-            Mensagem = "Erro: " + ex.Message;
-        }
-        finally
-        {
-            Calculando = false;
-            StateHasChanged();
-        }
+    private async Task CalcularJacobiana()
+    {
+        resultadoJacobiana = await Cliente.PostAsync<dynamic, MathPillars.Comum.Primitivos.Matriz>("api/calculo/jacobiana", new { });
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender) await JS.InvokeVoidAsync("renderizarMatematica");
     }
 }

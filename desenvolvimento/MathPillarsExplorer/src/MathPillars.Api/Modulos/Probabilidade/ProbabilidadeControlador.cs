@@ -6,20 +6,22 @@ using MathPillars.Api.Compartilhado;
 
 namespace MathPillars.Api.Modulos.Probabilidade;
 
-/// <summary>
-/// Controlador responsavel por receber e rotear requisicoes do modulo de Probabilidade e Estatística.
-/// </summary>
 [ApiController]
 [Route("api/probabilidade")]
 public class ProbabilidadeControlador : ControllerBase
 {
     private readonly BayesServico _bayesServico;
     private readonly GaussianaServico _gaussianaServico;
+    private readonly EntropiaCruzadaServico _entropiaServico;
 
-    public ProbabilidadeControlador(BayesServico bayesServico, GaussianaServico gaussianaServico)
+    public ProbabilidadeControlador(
+        BayesServico bayesServico, 
+        GaussianaServico gaussianaServico,
+        EntropiaCruzadaServico entropiaServico)
     {
         _bayesServico = bayesServico;
         _gaussianaServico = gaussianaServico;
+        _entropiaServico = entropiaServico;
     }
 
     [HttpPost("bayes")]
@@ -37,12 +39,17 @@ public class ProbabilidadeControlador : ControllerBase
         [FromQuery] int pontos)
     {
         Response.Headers.Append("Content-Type", "text/event-stream");
-        Response.Headers.Append("Cache-Control", "no-cache");
-        Response.Headers.Append("Connection", "keep-alive");
-
         await foreach (var evento in _gaussianaServico.GerarCurvaGaussianaComStreamingSSE(media, desvioPadrao, min, max, pontos))
         {
             await SSEHelper.EscreverEventoAsync(Response, evento);
         }
+    }
+
+    [HttpPost("entropia-cruzada")]
+    public ActionResult<ResultadoEntropiaCruzada> PostCalcularEntropia([FromBody] dynamic req)
+    {
+        double[] real = new[] { 1.0, 0.0, 0.0 };
+        double[] pred = new[] { 0.7, 0.2, 0.1 };
+        return Ok(_entropiaServico.Calcular(real, pred));
     }
 }

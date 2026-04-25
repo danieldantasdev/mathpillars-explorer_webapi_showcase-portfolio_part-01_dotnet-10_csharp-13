@@ -6,91 +6,121 @@
 <PageTitle>Probabilidade e Bayes | MathPillars</PageTitle>
 
 <h1 style="margin-bottom: 0.5rem;">Teoria da Probabilidade</h1>
-<p style="color: var(--cor-texto-secundario); margin-bottom: 3rem;">Inferencia Bayesiana e a atualizacao de crencas baseada em evidencias.</p>
+<p style="color: var(--cor-texto-secundario); margin-bottom: 3rem;">Inferencia Bayesiana e distribuicoes de probabilidade.</p>
 
-<PainelTeoria Titulo="Teorema de Bayes">
-    <p>O Teorema de Bayes descreve a probabilidade de um evento, baseado em um conhecimento previo de condicoes que podem estar relacionadas ao evento.</p>
-    <div class="formula-matematica" style="text-align: center;">
-        $$P(H|E) = \frac{P(E|H) \cdot P(H)}{P(E)}$$
-    </div>
-    <p style="margin-top: 1rem;">Onde:</p>
-    <ul style="font-size: 0.9rem; color: var(--cor-texto-secundario);">
-        <li>$P(H|E)$: Posterior (Crenca atualizada)</li>
-        <li>$P(E|H)$: Verossimilhanca (Chance da evidencia dado a hipotese)</li>
-        <li>$P(H)$: Prior (Crenca inicial)</li>
-        <li>$P(E)$: Evidencia (Probabilidade total do dado observado)</li>
-    </ul>
-</PainelTeoria>
-
-<div class="cartao-premium">
-    <h4>Experimento: Inferencia Bayesiana Dinamica</h4>
-    <p style="font-size: 0.85rem; color: var(--cor-texto-secundario); margin: 1rem 0;">Simule a atualizacao de uma probabilidade (ex: teste medico ou filtro de spam).</p>
-    
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-        <div>
-            <label style="display: block; font-size: 0.8rem; margin-bottom: 0.5rem; font-weight: 600;">Probabilidade Prior $P(H)$</label>
-            <input type="number" step="0.01" min="0" max="1" @bind="Prior" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--cor-borda);" />
-            <p style="font-size: 0.7rem; color: var(--cor-texto-secundario); mt-1;">Sua crenca inicial antes do teste.</p>
-        </div>
-        <div>
-            <label style="display: block; font-size: 0.8rem; margin-bottom: 0.5rem; font-weight: 600;">Verossimilhanca $P(E|H)$</label>
-            <input type="number" step="0.01" min="0" max="1" @bind="Verossimilhanca" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--cor-borda);" />
-            <p style="font-size: 0.7rem; color: var(--cor-texto-secundario); mt-1;">Sensibilidade do teste (Taxa de acerto).</p>
-        </div>
-        <div>
-            <label style="display: block; font-size: 0.8rem; margin-bottom: 0.5rem; font-weight: 600;">Falso Positivo $P(E|\neg H)$</label>
-            <input type="number" step="0.01" min="0" max="1" @bind="FalsoPositivo" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--cor-borda);" />
-            <p style="font-size: 0.7rem; color: var(--cor-texto-secundario); mt-1;">Probabilidade do teste dar positivo incorretamente.</p>
-        </div>
-    </div>
-
-    <button class="botao-primario" @onclick="CalcularBayes">
-        Atualizar Crenca (Calcular Posterior)
-    </button>
-
-    @if (Resultado != null)
-    {
-        <div style="margin-top: 2rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
-            <div class="cartao-premium" style="background-color: var(--cor-sucesso); color: white; border: none;">
-                <h6 style="margin-bottom: 0.5rem; opacity: 0.9;">Probabilidade Posterior</h6>
-                <h3 style="margin: 0;">@Resultado.ProbabilidadePosterior.ToString("P2")</h3>
-                <p style="font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.8;">Crenca atualizada apos a evidencia.</p>
-            </div>
-            
-            <div class="cartao-premium" style="background-color: var(--cor-primaria-suave); border: none;">
-                <h6 style="margin-bottom: 0.5rem; color: var(--cor-primaria);">Evidencia Total $P(E)$</h6>
-                <h3 style="margin: 0; color: var(--cor-texto-principal);">@Resultado.Evidencia.ToString("F4")</h3>
-                <p style="font-size: 0.75rem; margin-top: 0.5rem; color: var(--cor-texto-secundario);">Fator de normalizacao do modelo.</p>
-            </div>
-        </div>
-    }
+<div style="display: flex; gap: 1rem; margin-bottom: 2rem; overflow-x: auto; padding-bottom: 0.5rem;">
+    <button class="@(ExperimentoAtivo == "Bayes" ? "botao-primario" : "botao-secundario")" @onclick='() => ExperimentoAtivo = "Bayes"'>Bayes</button>
+    <button class="@(ExperimentoAtivo == "Gaussiana" ? "botao-primario" : "botao-secundario")" @onclick='() => ExperimentoAtivo = "Gaussiana"'>Gaussiana</button>
+    <button class="@(ExperimentoAtivo == "Entropia" ? "botao-primario" : "botao-secundario")" @onclick='() => ExperimentoAtivo = "Entropia"'>Entropia Cruzada</button>
 </div>
 
-@code {
-    private double Prior = 0.01;
-    private double Verossimilhanca = 0.99;
-    private double FalsoPositivo = 0.05;
-    private ResultadoBayes? Resultado;
+@if (ExperimentoAtivo == "Bayes")
+{
+    <PainelTeoria Titulo="Teorema de Bayes">
+        <p>Atualizacao de crencas baseada em novas evidencias.</p>
+        <div class="formula-matematica">$P(H|E) = \frac{P(E|H) \cdot P(H)}{P(E)}$</div>
+    </PainelTeoria>
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
+    <div class="cartao-premium">
+        <h4>Laboratorio: Inferencia Bayesiana</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+            <div><label>Prior P(H)</label><input type="number" step="0.01" @bind="Prior" class="input-premium" /></div>
+            <div><label>Verossimilhanca P(E|H)</label><input type="number" step="0.01" @bind="Verossimilhanca" class="input-premium" /></div>
+            <div><label>Falso Positivo</label><input type="number" step="0.01" @bind="FalsoPositivo" class="input-premium" /></div>
+        </div>
+        <button class="botao-primario" @onclick="CalcularBayes">Calcular Posterior</button>
+        
+        @if (resultadoBayes != null)
         {
-            await JS.InvokeVoidAsync("renderizarMatematica");
+            <div style="margin-top: 2rem;">
+                <div class="resultado-box-verde">
+                    <h6>Posterior Calculada</h6>
+                    <h3>@resultadoBayes.ProbabilidadePosterior.ToString("P2")</h3>
+                </div>
+            </div>
         }
-    }
+    </div>
+}
+else if (ExperimentoAtivo == "Gaussiana")
+{
+    <PainelTeoria Titulo="Distribuicao Normal (Gaussiana)">
+        <p>A curva em sino que descreve a maioria dos fenomenos naturais e erros em IA.</p>
+    </PainelTeoria>
+
+    <div class="cartao-premium">
+        <h4>Laboratorio: Curva de Densidade</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div><label>Media (μ)</label><input type="number" @bind="Media" class="input-premium" /></div>
+            <div><label>Desvio Padrao (σ)</label><input type="number" @bind="Desvio" class="input-premium" /></div>
+        </div>
+        <button class="botao-primario" style="margin-top: 1.5rem;" @onclick="GerarGaussiana">Plotar Curva</button>
+        <div id="grafico-gauss" style="height: 400px; width: 100%; margin-top: 2rem;"></div>
+    </div>
+}
+else if (ExperimentoAtivo == "Entropia")
+{
+    <PainelTeoria Titulo="Entropia Cruzada (Cross-Entropy)">
+        <p>Mede a disparidade entre a distribuicao real e a predita pelo modelo de IA.</p>
+    </PainelTeoria>
+
+    <div class="cartao-premium">
+        <h4>Laboratorio: Perda de Classificacao</h4>
+        <button class="botao-primario" @onclick="CalcularEntropia">Calcular Loss</button>
+        
+        @if (resultadoEntropia != null)
+        {
+            <div style="margin-top: 2rem;">
+                <div class="resultado-box-verde">
+                    <h6>Valor da Entropia</h6>
+                    <h3>@resultadoEntropia.EntropiaCruzada.ToString("F6")</h3>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<style>
+    .input-premium { width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--cor-borda); background: white; }
+    .resultado-box-verde { background-color: var(--cor-sucesso); color: white; padding: 1.5rem; border-radius: 12px; }
+    .botao-secundario { background: transparent; border: 1px solid var(--cor-borda); padding: 0.6rem 1.2rem; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+</style>
+
+@code {
+    private string ExperimentoAtivo = "Bayes";
+
+    // Bayes
+    private double Prior = 0.01, Verossimilhanca = 0.99, FalsoPositivo = 0.05;
+    private ResultadoBayes? resultadoBayes;
+
+    // Gaussiana
+    private double Media = 0, Desvio = 1;
+
+    // Entropia
+    private ResultadoEntropiaCruzada? resultadoEntropia;
 
     private async Task CalcularBayes()
     {
-        try 
+        resultadoBayes = await Cliente.PostAsync<RequisicaoBayes, ResultadoBayes>("api/probabilidade/bayes", new(Prior, Verossimilhanca, FalsoPositivo));
+    }
+
+    private async Task GerarGaussiana()
+    {
+        var url = $"api/probabilidade/gaussiana/stream?media={Media}&desvioPadrao={Desvio}&min=-5&max=5&pontos=100";
+        var pontos = new List<PontoGaussiana>();
+        await foreach (var ev in Cliente.ObterStreamSSE<ResultadoSSE<PontoGaussiana[]>>(url))
         {
-            var requisicao = new RequisicaoBayes(Prior, Verossimilhanca, FalsoPositivo);
-            Resultado = await Cliente.PostAsync<RequisicaoBayes, ResultadoBayes>("api/probabilidade/bayes", requisicao);
-            StateHasChanged();
+            if (ev.DadosParciais != null) pontos.AddRange(ev.DadosParciais);
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Erro no calculo de Bayes: " + ex.Message);
-        }
+        await JS.InvokeVoidAsync("renderizarGrafico2D", "grafico-gauss", pontos);
+    }
+
+    private async Task CalcularEntropia()
+    {
+        resultadoEntropia = await Cliente.PostAsync<dynamic, ResultadoEntropiaCruzada>("api/probabilidade/entropia-cruzada", new { });
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender) await JS.InvokeVoidAsync("renderizarMatematica");
     }
 }
