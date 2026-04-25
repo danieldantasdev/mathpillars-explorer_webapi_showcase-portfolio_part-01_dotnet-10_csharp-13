@@ -18,12 +18,34 @@
 </PainelTeoria>
 
 <div class="cartao-premium">
-    <h4>Experimento: Decomposicao SVD em Tempo Real</h4>
-    <p style="font-size: 0.85rem; color: var(--cor-texto-secundario); margin: 1rem 0;">Simule o processamento de uma matriz de grandes dimensoes utilizando streaming SSE.</p>
+    <h4>Experimento: Decomposicao SVD Dinamica</h4>
+    <p style="font-size: 0.85rem; color: var(--cor-texto-secundario); margin: 1rem 0;">Defina as dimensoes e os elementos da matriz para visualizar a decomposicao em tempo real.</p>
     
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; max-width: 400px;">
+        <div>
+            <label style="display: block; font-size: 0.8rem; margin-bottom: 0.5rem; font-weight: 600;">Linhas</label>
+            <input type="number" min="1" max="5" @bind="NumLinhas" @bind:event="oninput" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--cor-borda);" />
+        </div>
+        <div>
+            <label style="display: block; font-size: 0.8rem; margin-bottom: 0.5rem; font-weight: 600;">Colunas</label>
+            <input type="number" min="1" max="5" @bind="NumColunas" @bind:event="oninput" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--cor-borda);" />
+        </div>
+    </div>
+
+    <div style="margin-bottom: 2rem;">
+        <label style="display: block; font-size: 0.8rem; margin-bottom: 1rem; font-weight: 600;">Elementos da Matriz</label>
+        <div style="display: grid; grid-template-columns: repeat(@NumColunas, 1fr); gap: 0.75rem; max-width: @(NumColunas * 100)px;">
+            @for (int i = 0; i < NumLinhas * NumColunas; i++)
+            {
+                var indice = i;
+                <input type="number" step="0.1" @bind="ElementosMatriz[indice]" style="width: 100%; padding: 0.5rem; border-radius: 6px; border: 1px solid var(--cor-borda); text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;" />
+            }
+        </div>
+    </div>
+
     <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
         <button class="botao-primario" @onclick="IniciarSVD" disabled="@Calculando">
-            Iniciar Decomposicao (SSE)
+            @(Calculando ? "Processando..." : "Iniciar Decomposicao (SSE)")
         </button>
     </div>
 
@@ -32,26 +54,54 @@
     @if (Resultado != null)
     {
         <div style="margin-top: 2rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
-            <div class="cartao-premium" style="background-color: var(--cor-primaria-suave);">
-                <h6 style="margin-bottom: 0.5rem;">Valores Singulares ($\sigma$)</h6>
-                <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;">
-                    @string.Join(", ", Resultado.ValoresSingulares.Select(v => v.ToString("F2")))
+            <div class="cartao-premium" style="background-color: var(--cor-primaria-suave); border: none;">
+                <h6 style="margin-bottom: 0.5rem; color: var(--cor-primaria);">Valores Singulares ($\sigma$)</h6>
+                <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; font-weight: 600;">
+                    @string.Join(", ", Resultado.ValoresSingulares.Select(v => v.ToString("F3")))
                 </p>
             </div>
-            <div class="cartao-premium" style="background-color: var(--cor-primaria-suave);">
-                <h6 style="margin-bottom: 0.5rem;">Dimensoes de $U$</h6>
-                <p>@Resultado.MatrizU.Linhas x @Resultado.MatrizU.Colunas</p>
+            <div class="cartao-premium" style="background-color: var(--cor-primaria-suave); border: none;">
+                <h6 style="margin-bottom: 0.5rem; color: var(--cor-primaria);">Dimensoes da Matriz U</h6>
+                <p style="font-weight: 600;">@Resultado.MatrizU.Linhas x @Resultado.MatrizU.Colunas</p>
             </div>
         </div>
     }
 </div>
 
 @code {
+    private int _numLinhas = 2;
+    private int _numColunas = 3;
+
+    private int NumLinhas 
+    { 
+        get => _numLinhas; 
+        set { if (value >= 1 && value <= 5) { _numLinhas = value; AtualizarMatriz(); } } 
+    }
+
+    private int NumColunas 
+    { 
+        get => _numColunas; 
+        set { if (value >= 1 && value <= 5) { _numColunas = value; AtualizarMatriz(); } } 
+    }
+
+    private double[] ElementosMatriz = new double[6] { 1, 2, 3, 4, 5, 6 };
+
     private bool Calculando = false;
     private int Progresso = 0;
     private string Mensagem = "";
     private ResultadoSVD? Resultado;
     private CancellationTokenSource? _cts;
+
+    private void AtualizarMatriz()
+    {
+        var novoTamanho = _numLinhas * _numColunas;
+        var novaLista = new double[novoTamanho];
+        for (int i = 0; i < Math.Min(novoTamanho, ElementosMatriz.Length); i++)
+        {
+            novaLista[i] = ElementosMatriz[i];
+        }
+        ElementosMatriz = novaLista;
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -72,9 +122,8 @@
         Mensagem = "Iniciando conexao SSE...";
         StateHasChanged();
 
-        var elementos = new double[] { 1, 2, 3, 4, 5, 6 };
-        var json = System.Text.Json.JsonSerializer.Serialize(elementos);
-        var url = $"api/algebra-linear/svd/stream?linhas=2&colunas=3&elementosJson={json}";
+        var json = System.Text.Json.JsonSerializer.Serialize(ElementosMatriz);
+        var url = $"api/algebra-linear/svd/stream?linhas={NumLinhas}&colunas={NumColunas}&elementosJson={json}";
 
         try
         {
