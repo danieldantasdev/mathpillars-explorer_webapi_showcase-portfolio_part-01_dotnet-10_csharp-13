@@ -1,0 +1,40 @@
+@startuml 15-c4-container
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_WITH_LEGEND()
+
+title Diagrama C4 — Container: MathPillars Explorer
+
+Person(usuario, "Usuario", "Profissional ML/IA, Professor ou Autodidata")
+
+System_Boundary(mathPillars, "MathPillars Explorer") {
+
+    Container(webApp, "MathPillars.Web", "Blazor WebAssembly (.NET 10)", "Interface interativa com experimentos matematicos, visualizacoes 3D/2D e renderizacao de formulas LaTeX. Roda inteiramente no browser via WebAssembly.")
+
+    Container(api, "MathPillars.Api", "ASP.NET Core Web API (.NET 10)", "Motor de calculo matematico (MathCore). Expoe endpoints REST e SSE para calculos de Algebra Linear, Calculo Multivariavel e Probabilidade/Estatistica.")
+
+    ContainerDb(staticFiles, "Arquivos Estaticos", "wwwroot (HTML, CSS, JS, WASM)", "Assets do Blazor WASM servidos ao browser no carregamento inicial da aplicacao.")
+}
+
+System_Ext(mathnet, "MathNet.Numerics", "Biblioteca de computacao numerica .NET")
+System_Ext(katex, "KaTeX.js", "Renderizacao de LaTeX no browser")
+System_Ext(plotly, "Plotly.js", "Graficos 3D interativos no browser")
+
+Rel(usuario, webApp, "Interage com experimentos", "HTTPS (Browser)")
+Rel(usuario, staticFiles, "Download inicial dos assets", "HTTPS (uma vez, com cache)")
+
+Rel(webApp, api, "Requisicoes de calculo leve", "REST JSON / HTTPS")
+Rel(webApp, api, "Streaming de calculos pesados", "SSE text/event-stream / HTTPS")
+Rel(webApp, katex, "Renderiza formulas LaTeX", "JS Interop")
+Rel(webApp, plotly, "Renderiza graficos 3D", "JS Interop")
+
+Rel(api, mathnet, "Executa algoritmos numericos", "Chamada .NET interna")
+
+note right of api
+  Stateless: sem banco de dados,
+  sem autenticacao, sem sessao.
+  Foco exclusivo em calculos
+  matematicos puros.
+end note
+
+@enduml

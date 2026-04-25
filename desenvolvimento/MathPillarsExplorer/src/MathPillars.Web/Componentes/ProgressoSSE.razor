@@ -1,0 +1,18 @@
+@if (Visivel)
+{
+    <div class="container-progresso" style="margin: 1.5rem 0;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+            <span style="font-size: 0.85rem; font-weight: 600; color: var(--cor-primaria);">@Mensagem</span>
+            <span style="font-size: 0.85rem; font-weight: 600;">@Percentual%</span>
+        </div>
+        <div style="height: 8px; background-color: var(--cor-borda); border-radius: 4px; overflow: hidden;">
+            <div style="width: @(Percentual)%; height: 100%; background-color: var(--cor-primaria); transition: width 0.3s ease;"></div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool Visivel { get; set; }
+    [Parameter] public int Percentual { get; set; }
+    [Parameter] public string Mensagem { get; set; } = "Processando...";
+}

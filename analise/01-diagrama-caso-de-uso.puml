@@ -1,0 +1,84 @@
+@startuml 01-diagrama-caso-de-uso
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+    BackgroundColor #F0F8FF
+    BorderColor #2C3E50
+    ArrowColor #2C3E50
+}
+
+actor "Profissional de ML/IA" as profissional
+actor "Professor e Pesquisador" as professor
+actor "Autodidata Avancado" as autodidata
+
+rectangle "MathPillars Explorer" {
+    package "Modulo A: Algebra Linear" {
+        usecase "Calcular Produto Escalar" as UC01
+        usecase "Visualizar Similaridade de Cosseno" as UC02
+        usecase "Executar Decomposicao SVD" as UC03
+        usecase "Executar Analise PCA" as UC04
+        usecase "Calcular Autovetores e Autovalores" as UC05
+    }
+
+    package "Modulo B: Calculo Multivariavel" {
+        usecase "Visualizar Loss Landscape 3D" as UC06
+        usecase "Comparar Otimizadores AdamW e Sophia" as UC07
+        usecase "Visualizar Backpropagation" as UC08
+        usecase "Calcular Gradiente" as UC09
+        usecase "Calcular Matriz Jacobiana" as UC10
+    }
+
+    package "Modulo C: Probabilidade e Estatistica" {
+        usecase "Aplicar Teorema de Bayes" as UC11
+        usecase "Ajustar Distribuicao Gaussiana" as UC12
+        usecase "Calcular Cross-Entropy Loss" as UC13
+    }
+
+    package "Secao Teorica" {
+        usecase "Consultar Formalizacao LaTeX" as UC14
+        usecase "Ler sobre Fronteiras de 2026" as UC15
+        usecase "Explorar Framework LEA" as UC16
+    }
+}
+
+profissional --> UC01
+profissional --> UC02
+profissional --> UC03
+profissional --> UC04
+profissional --> UC05
+profissional --> UC06
+profissional --> UC07
+profissional --> UC09
+profissional --> UC10
+profissional --> UC11
+profissional --> UC12
+profissional --> UC13
+
+professor --> UC01
+professor --> UC02
+professor --> UC06
+professor --> UC08
+professor --> UC11
+professor --> UC14
+professor --> UC15
+professor --> UC16
+
+autodidata --> UC01
+autodidata --> UC02
+autodidata --> UC03
+autodidata --> UC06
+autodidata --> UC07
+autodidata --> UC11
+autodidata --> UC14
+autodidata --> UC15
+autodidata --> UC16
+
+UC03 ..> UC14 : includes
+UC04 ..> UC14 : includes
+UC06 ..> UC14 : includes
+UC07 ..> UC14 : includes
+UC11 ..> UC14 : includes
+UC12 ..> UC14 : includes
+
+@enduml

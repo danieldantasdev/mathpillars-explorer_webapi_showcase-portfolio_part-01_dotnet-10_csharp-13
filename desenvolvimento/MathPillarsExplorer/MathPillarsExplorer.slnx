@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/MathPillars.Api/MathPillars.Api.csproj" />
+    <Project Path="src/MathPillars.Comum/MathPillars.Comum.csproj" />
+    <Project Path="src/MathPillars.Web/MathPillars.Web.csproj" />
+  </Folder>
+  <Folder Name="/testes/">
+    <Project Path="testes/MathPillars.Testes/MathPillars.Testes.csproj" />
+  </Folder>
+</Solution>

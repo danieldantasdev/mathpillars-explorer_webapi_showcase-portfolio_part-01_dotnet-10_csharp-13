@@ -1,0 +1,28 @@
+@startuml 14-c4-contexto
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+LAYOUT_WITH_LEGEND()
+
+title Diagrama C4 — Contexto do Sistema: MathPillars Explorer
+
+Person(profissionalML, "Profissional de ML/IA", "Experimenta e consulta conceitos matematicos de forma visual e rapida.")
+Person(professor, "Professor e Pesquisador", "Utiliza a plataforma como recurso de apoio em aulas e demonstracoes.")
+Person(autodidata, "Autodidata Avancado", "Aprende a matematica por tras de LLMs e redes neurais com rigor formal.")
+
+System(mathPillarsExplorer, "MathPillars Explorer", "Laboratorio interativo que visualiza e formaliza os tres pilares matematicos da Inteligencia Artificial: Algebra Linear, Calculo Multivariavel e Probabilidade.")
+
+System_Ext(mathnetNumerics, "MathNet.Numerics", "Biblioteca .NET de computacao numerica. Fornece algoritmos para SVD, PCA, decomposicoes matriciais e estatistica.")
+
+System_Ext(katex, "KaTeX / MathJax", "Motor de renderizacao de formulas matematicas em LaTeX para o browser.")
+
+System_Ext(plotlyJs, "Plotly.js", "Biblioteca de visualizacao de graficos interativos 2D e 3D no browser.")
+
+Rel(profissionalML, mathPillarsExplorer, "Executa experimentos matematicos", "HTTPS (Browser)")
+Rel(professor, mathPillarsExplorer, "Demonstra conceitos em sala de aula", "HTTPS (Browser)")
+Rel(autodidata, mathPillarsExplorer, "Aprende matematica interativamente", "HTTPS (Browser)")
+
+Rel(mathPillarsExplorer, mathnetNumerics, "Delega calculos numericos pesados", "Chamada direta .NET")
+Rel(mathPillarsExplorer, katex, "Renderiza formulas LaTeX", "JS (Browser)")
+Rel(mathPillarsExplorer, plotlyJs, "Renderiza graficos 3D interativos", "JS Interop (Browser)")
+
+@enduml

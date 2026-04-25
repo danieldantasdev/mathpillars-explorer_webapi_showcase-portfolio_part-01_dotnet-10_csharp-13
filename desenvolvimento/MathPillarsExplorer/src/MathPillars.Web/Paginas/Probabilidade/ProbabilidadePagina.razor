@@ -1,0 +1,62 @@
+@page "/probabilidade"
+@using MathPillars.Comum.Contratos; using MathPillars.Comum.Modulos.Probabilidade
+@inject ClienteMathCore Cliente
+@inject IJSRuntime JS
+
+<PageTitle>Probabilidade e Estatistica | MathPillars</PageTitle>
+
+<h1 style="margin-bottom: 0.5rem;">Probabilidade e Estatistica</h1>
+<p style="color: var(--cor-texto-secundario); margin-bottom: 3rem;">Estudo da incerteza, teoria da informacao e distribuicoes de dados.</p>
+
+<PainelTeoria Titulo="Teorema de Bayes">
+    <p>O Teorema de Bayes descreve a probabilidade de um evento baseando-se no conhecimento previo de condicoes que podem estar relacionadas ao evento.</p>
+    <div class="formula-matematica" style="text-align: center;">
+        $$P(H|E) = \frac{P(E|H) \cdot P(H)}{P(E)}$$
+    </div>
+    <p style="margin-top: 1rem;">Onde $P(H|E)$ e a probabilidade posterior, $P(H)$ e a prior e $P(E|H)$ e a verossimilhanca.</p>
+</PainelTeoria>
+
+<div class="cartao-premium">
+    <h4>Experimento: Atualizacao Bayesiana</h4>
+    <p style="font-size: 0.85rem; color: var(--cor-texto-secundario); margin: 1rem 0;">Calcule como novas evidencias alteram sua crenca previa em um modelo.</p>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+        <div>
+            <label style="display: block; font-size: 0.8rem; margin-bottom: 0.5rem;">Probabilidade Prior $P(H)$</label>
+            <input type="number" step="0.01" class="cartao-premium" style="width: 100%; padding: 0.5rem;" @bind="Prior" />
+        </div>
+        <div>
+            <label style="display: block; font-size: 0.8rem; margin-bottom: 0.5rem;">Verossimilhanca $P(E|H)$</label>
+            <input type="number" step="0.01" class="cartao-premium" style="width: 100%; padding: 0.5rem;" @bind="Verossimilhanca" />
+        </div>
+    </div>
+
+    <button class="botao-primario" @onclick="CalcularBayes">
+        Atualizar Crenca (Calcular Posterior)
+    </button>
+
+    @if (Resultado != null)
+    {
+        <div style="margin-top: 2rem; padding: 1.5rem; background-color: var(--cor-sucesso); color: white; border-radius: 12px;">
+            <h5>Posterior Calculada: @Resultado.ProbabilidadePosterior.ToString("P2")</h5>
+            <p style="font-size: 0.8rem; margin-top: 0.5rem;">Evidencia total calculada: @Resultado.Evidencia.ToString("F4")</p>
+        </div>
+    }
+</div>
+
+@code {
+    private double Prior = 0.1;
+    private double Verossimilhanca = 0.9;
+    private ResultadoBayes? Resultado;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await JS.InvokeVoidAsync("renderizarMatematica");
+    }
+
+    private async Task CalcularBayes()
+    {
+        var requisicao = new RequisicaoBayes(Prior, Verossimilhanca, 0.05);
+        Resultado = await Cliente.PostAsync<RequisicaoBayes, ResultadoBayes>("api/probabilidade/bayes", requisicao);
+    }
+}

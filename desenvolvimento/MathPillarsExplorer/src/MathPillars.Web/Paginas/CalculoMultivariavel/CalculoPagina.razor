@@ -1,0 +1,84 @@
+@page "/calculo"
+@using MathPillars.Comum.Contratos; using MathPillars.Comum.Modulos.CalculoMultivariavel
+@inject ClienteMathCore Cliente
+@inject IJSRuntime JS
+
+<PageTitle>Calculo Multivariavel | MathPillars</PageTitle>
+
+<h1 style="margin-bottom: 0.5rem;">Calculo Multivariavel</h1>
+<p style="color: var(--cor-texto-secundario); margin-bottom: 3rem;">Exploracao de gradientes, superficies de perda e otimizacao em alta dimensao.</p>
+
+<PainelTeoria Titulo="O Campo de Gradientes">
+    <p>O gradiente de uma funcao escalar $f(x, y)$ aponta na direcao de maior crescimento local da funcao. No treinamento de redes neurais, buscamos a direcao oposta para minimizar o erro:</p>
+    <div class="formula-matematica" style="text-align: center;">
+        $$\nabla f(x, y) = \begin{bmatrix} \frac{\partial f}{\partial x} \\ \frac{\partial f}{\partial y} \end{bmatrix}$$
+    </div>
+    <p style="margin-top: 1rem;">Otimizadores modernos como AdamW e Sophia utilizam informacoes de primeira e segunda ordem para navegar nestas superficies.</p>
+</PainelTeoria>
+
+<div class="cartao-premium">
+    <h4>Experimento: Geracao de Loss Landscape</h4>
+    <p style="font-size: 0.85rem; color: var(--cor-texto-secundario); margin: 1rem 0;">Visualize a complexidade da funcao de Rosenbrock ("Bananeira"), um benchmark classico para otimizadores.</p>
+    
+    <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+        <button class="botao-primario" @onclick="GerarSuperficie" disabled="@Calculando">
+            Gerar Superficie 3D (SSE)
+        </button>
+    </div>
+
+    <ProgressoSSE Visivel="@Calculando" Percentual="@Progresso" Mensagem="@Mensagem" />
+
+    @if (Pontos != null)
+    {
+        <div style="margin-top: 2rem; padding: 1.5rem; background-color: var(--cor-primaria-suave); border-radius: 12px; text-align: center;">
+            <p><strong>Superficie gerada com @Pontos.Length pontos.</strong></p>
+            <p style="font-size: 0.8rem; color: var(--cor-secundaria); margin-top: 0.5rem;">Visualizacao 3D interativa via Plotly.js (Simulado)</p>
+        </div>
+    }
+</div>
+
+@code {
+    private bool Calculando = false;
+    private int Progresso = 0;
+    private string Mensagem = "";
+    private PontoSuperficie3D[]? Pontos;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await JS.InvokeVoidAsync("renderizarMatematica");
+    }
+
+    private async Task GerarSuperficie()
+    {
+        Calculando = true;
+        Pontos = null;
+        Progresso = 0;
+        Mensagem = "Solicitando grade ao servidor...";
+
+        var url = "api/calculo/loss-landscape/stream?funcaoNome=RosenbrockBidimensional&minX=-2&maxX=2&minY=-1&maxY=3";
+
+        try
+        {
+            await foreach (var evento in Cliente.ObterStreamSSE<ResultadoSSE<PontoSuperficie3D[]>>(url))
+            {
+                Progresso = evento.ProgressoPercentual;
+                Mensagem = evento.MensagemProgresso;
+                
+                if (evento.Concluido && evento.DadosParciais != null)
+                {
+                    Pontos = evento.DadosParciais;
+                }
+                
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Mensagem = "Erro: " + ex.Message;
+        }
+        finally
+        {
+            Calculando = false;
+        }
+    }
+}

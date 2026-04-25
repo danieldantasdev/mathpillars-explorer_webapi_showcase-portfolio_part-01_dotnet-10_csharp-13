@@ -1,0 +1,54 @@
+@startuml 13-diagrama-visao-geral-interacao
+skinparam sequence {
+    BackgroundColor #F0F8FF
+    BorderColor #2C3E50
+    ArrowColor #2C3E50
+}
+
+start
+
+partition "Modulo A: Algebra Linear" {
+    :ref over ExperimentoProdutoEscalar, ProdutoEscalarServico
+      Calculo de Produto Escalar
+    end ref;
+
+    :ref over ExperimentoSVD, SVDServico
+      Decomposicao SVD via SSE
+    end ref;
+}
+
+fork
+    partition "Modulo B: Calculo Multivariavel" {
+        :ref over ExperimentoLossLandscape, LossLandscapeServico
+          Geracao de Loss Landscape 3D via SSE
+        end ref;
+
+        :ref over ExperimentoOtimizadores, ComparadorOtimizadoresServico
+          Comparacao AdamW vs Sophia via SSE
+        end ref;
+    }
+fork again
+    partition "Modulo C: Probabilidade e Estatistica" {
+        :ref over ExperimentoBayes, BayesServico
+          Calculo do Teorema de Bayes
+        end ref;
+
+        :ref over ExperimentoGaussiana, GaussianaServico
+          Ajuste de Curva Gaussiana via SSE
+        end ref;
+    }
+end fork
+
+partition "Componentes Transversais" {
+    :ref over PainelTeoria
+      Renderizacao LaTeX em todos os modulos
+    end ref;
+
+    :ref over ProgressoSSE
+      Exibicao de progresso para todos os calculos SSE
+    end ref;
+}
+
+stop
+
+@enduml

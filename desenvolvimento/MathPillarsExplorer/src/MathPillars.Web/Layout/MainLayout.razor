@@ -1,0 +1,60 @@
+@inherits LayoutComponentBase
+
+<div class="layout-principal">
+    <aside class="barra-lateral">
+        <div class="logo">
+            <h2 style="color: var(--cor-primaria);">MathPillars</h2>
+            <p style="font-size: 0.8rem; color: var(--cor-secundaria);">Explorer v1.0</p>
+        </div>
+
+        <nav class="navegacao-menu" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 2rem;">
+            <NavLink class="link-menu" href="" Match="NavLinkMatch.All">
+                Inicio
+            </NavLink>
+            
+            <div style="margin-top: 1.5rem;">
+                <p style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--cor-secundaria); margin-bottom: 0.5rem;">Modulos</p>
+                <NavLink class="link-menu" href="algebra-linear">
+                    Algebra Linear
+                </NavLink>
+                <NavLink class="link-menu" href="calculo">
+                    Calculo
+                </NavLink>
+                <NavLink class="link-menu" href="probabilidade">
+                    Probabilidade
+                </NavLink>
+            </div>
+        </nav>
+
+        <footer style="margin-top: auto; font-size: 0.7rem; color: var(--cor-secundaria);">
+            &copy; 2026 MathPillars Explorer<br/>
+            Foco em Formalismo Matematico
+        </footer>
+    </aside>
+
+    <main class="conteudo-principal">
+        @Body
+    </main>
+</div>
+
+<style>
+    .link-menu {
+        display: block;
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        color: var(--cor-texto-secundario);
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+    .link-menu:hover {
+        background-color: var(--cor-primaria-suave);
+        color: var(--cor-primaria);
+    }
+
+    .link-menu.active {
+        background-color: var(--cor-primaria);
+        color: white;
+    }
+</style>

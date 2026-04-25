@@ -1,0 +1,58 @@
+@startuml 06-diagrama-atividade
+skinparam activity {
+    BackgroundColor #F0F8FF
+    BorderColor #2C3E50
+    ArrowColor #2C3E50
+    StartColor #2C3E50
+    EndColor #2C3E50
+    DiamondBackgroundColor #FFF8DC
+    DiamondBorderColor #2C3E50
+}
+
+start
+
+:Usuario acessa pagina do experimento;
+:Painel de teoria exibe formalizacao LaTeX do conceito;
+:Usuario configura parametros no PainelParametros;
+
+:Sistema valida entradas;
+
+if (Parametros dentro dos limites?) then (sim)
+    :Exibir ProgressoSSE em estado de carregamento;
+    :ClienteMathCore inicia requisicao SSE ao controlador;
+
+    repeat
+        :Controlador recebe evento do servico matematico;
+        :LeitorSSE processa evento recebido;
+
+        if (Evento de progresso?) then (sim)
+            :Atualizar barra de progresso na UI;
+        else (nao — evento de conclusao)
+            :Extrair DadosParciais do ResultadoSSE;
+        endif
+
+    repeat while (Concluido == false?) is (sim)
+    -> nao;
+
+    :Ocultar ProgressoSSE;
+    :Renderizar graficos (Plotly3D ou ScottPlot2D);
+    :Renderizar formalizacao LaTeX do resultado;
+
+    :Usuario analisa resultado;
+
+    if (Usuario deseja novo experimento?) then (sim)
+        :Limpar estado da pagina;
+        :Retornar a configuracao de parametros;
+    else (nao)
+        :Usuario navega para outro modulo ou encerra;
+    endif
+
+else (nao)
+    :Exibir mensagem de erro de validacao;
+    :Destacar campos invalidos;
+    :Aguardar correcao do usuario;
+endif
+
+stop
+
+@enduml

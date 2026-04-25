@@ -1,0 +1,58 @@
+@startuml 08-diagrama-implantacao
+skinparam node {
+    BackgroundColor #F0F8FF
+    BorderColor #2C3E50
+}
+skinparam artifact {
+    BackgroundColor #FFFACD
+    BorderColor #2C3E50
+}
+skinparam database {
+    BackgroundColor #E8F5E9
+    BorderColor #2C3E50
+}
+
+node "Maquina do Usuario\n(Browser)" as browser {
+    node "WebAssembly Runtime\n(.NET 10 WASM)" as wasmRuntime {
+        artifact "MathPillars.Web.dll\n(Blazor WASM)" as webDll
+        artifact "KaTeX.js\n(Renderizacao LaTeX)" as katex
+        artifact "Plotly.js\n(Graficos 3D)" as plotly
+        artifact "ScottPlot.WASM\n(Graficos 2D)" as scottplot
+    }
+}
+
+node "Servidor de Hospedagem\n(ASP.NET Core 10)" as servidor {
+    node "Processo ASP.NET Core" as processoApi {
+        artifact "MathPillars.Api.dll\n(Web API)" as apiDll
+        artifact "MathNet.Numerics.dll\n(Motor Matematico)" as mathnet
+    }
+
+    node "Servidor de Arquivos Estaticos" as arquivosEstaticos {
+        artifact "wwwroot/\n(Assets Blazor WASM)" as wwwroot
+        artifact "index.html\n(Ponto de entrada)" as indexHtml
+    }
+}
+
+browser -down-> servidor : HTTPS\nREST (JSON) / SSE (text/event-stream)
+webDll --> katex : JS Interop
+webDll --> plotly : JS Interop
+webDll --> scottplot : Uso direto WASM
+apiDll --> mathnet : Chamada direta .NET
+
+browser ..> wwwroot : Download inicial dos\nassets WASM (cache)
+
+note right of browser
+  Stateless por design.
+  Nenhum dado persiste
+  entre sessoes.
+end note
+
+note right of servidor
+  CPU-bound: MathNet.Numerics
+  executa SVD, PCA, gradientes
+  diretamente no servidor.
+  SSE transmite progresso
+  em tempo real.
+end note
+
+@enduml

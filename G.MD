@@ -428,11 +428,11 @@ Discussão teórica sobre como a matemática sustenta a estabilidade de sistemas
 
 | Fase | Status |
 |------|--------|
-| Fase 0 — Infraestrutura Base | Pendente |
-| Fase 1 — Módulo A: Álgebra Linear | Pendente |
-| Fase 2 — Módulo B: Cálculo Multivariável | Pendente |
-| Fase 3 — Módulo C: Probabilidade e Estatística | Pendente |
-| Fase 4 — Seção Teórica + Polimento | Pendente |
+| Fase 0 — Infraestrutura Base | Concluída (100%) |
+| Fase 1 — Módulo A: Álgebra Linear | Concluída (100%) |
+| Fase 2 — Módulo B: Cálculo Multivariável | Concluída (100%) |
+| Fase 3 — Módulo C: Probabilidade e Estatística | Concluída (100%) |
+| Fase 4 — Seção Teórica + Polimento | Concluída (100%) |
 
 ---
 

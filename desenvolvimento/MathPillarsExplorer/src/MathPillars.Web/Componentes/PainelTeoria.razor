@@ -1,0 +1,11 @@
+<div class="cartao-premium" style="border-left: 4px solid var(--cor-primaria); margin-bottom: 2rem;">
+    <h3 style="margin-bottom: 1rem; color: var(--cor-primaria);">@Titulo</h3>
+    <div class="conteudo-teoria" style="color: var(--cor-texto-secundario); font-size: 0.95rem;">
+        @ChildContent
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Titulo { get; set; } = "Fundamentacao Teórica";
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

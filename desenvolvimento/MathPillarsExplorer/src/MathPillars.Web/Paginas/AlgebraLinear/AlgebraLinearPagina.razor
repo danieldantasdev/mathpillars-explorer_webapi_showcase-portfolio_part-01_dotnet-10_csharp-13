@@ -1,0 +1,95 @@
+@page "/algebra-linear"
+@using MathPillars.Comum.Primitivos
+@using MathPillars.Comum.Contratos; using MathPillars.Comum.Modulos.AlgebraLinear
+@inject ClienteMathCore Cliente
+@inject IJSRuntime JS
+
+<PageTitle>Algebra Linear | MathPillars</PageTitle>
+
+<h1 style="margin-bottom: 0.5rem;">Algebra Linear</h1>
+<p style="color: var(--cor-texto-secundario); margin-bottom: 3rem;">Fundamentos de vetores, matrizes e decomposicoes para Inteligencia Artificial.</p>
+
+<PainelTeoria Titulo="Decomposicao em Valores Singulares (SVD)">
+    <p>A SVD e uma das ferramentas mais poderosas da algebra linear, permitindo a fatoracao de qualquer matriz $A_{m \times n}$ em:</p>
+    <div class="formula-matematica" style="text-align: center;">
+        $$A = U \Sigma V^T$$
+    </div>
+    <p style="margin-top: 1rem;">Onde $U$ e $V$ sao matrizes ortogonais e $\Sigma$ contem os valores singulares, que representam a importancia de cada componente.</p>
+</PainelTeoria>
+
+<div class="cartao-premium">
+    <h4>Experimento: Decomposicao SVD em Tempo Real</h4>
+    <p style="font-size: 0.85rem; color: var(--cor-texto-secundario); margin: 1rem 0;">Simule o processamento de uma matriz de grandes dimensoes utilizando streaming SSE.</p>
+    
+    <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+        <button class="botao-primario" @onclick="IniciarSVD" disabled="@Calculando">
+            Iniciar Decomposicao (SSE)
+        </button>
+    </div>
+
+    <ProgressoSSE Visivel="@Calculando" Percentual="@Progresso" Mensagem="@Mensagem" />
+
+    @if (Resultado != null)
+    {
+        <div style="margin-top: 2rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div class="cartao-premium" style="background-color: var(--cor-primaria-suave);">
+                <h6 style="margin-bottom: 0.5rem;">Valores Singulares ($\sigma$)</h6>
+                <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;">
+                    @string.Join(", ", Resultado.ValoresSingulares.Select(v => v.ToString("F2")))
+                </p>
+            </div>
+            <div class="cartao-premium" style="background-color: var(--cor-primaria-suave);">
+                <h6 style="margin-bottom: 0.5rem;">Dimensoes de $U$</h6>
+                <p>@Resultado.MatrizU.Linhas x @Resultado.MatrizU.Colunas</p>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private bool Calculando = false;
+    private int Progresso = 0;
+    private string Mensagem = "";
+    private ResultadoSVD? Resultado;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await JS.InvokeVoidAsync("renderizarMatematica");
+    }
+
+    private async Task IniciarSVD()
+    {
+        Calculando = true;
+        Resultado = null;
+        Progresso = 0;
+        Mensagem = "Iniciando conexao SSE...";
+
+        var elementos = new double[] { 1, 2, 3, 4, 5, 6 };
+        var json = System.Text.Json.JsonSerializer.Serialize(elementos);
+        var url = $"api/algebra-linear/svd/stream?linhas=2&colunas=3&elementosJson={json}";
+
+        try
+        {
+            await foreach (var evento in Cliente.ObterStreamSSE<ResultadoSSE<ResultadoSVD>>(url))
+            {
+                Progresso = evento.ProgressoPercentual;
+                Mensagem = evento.MensagemProgresso;
+                
+                if (evento.Concluido && evento.DadosParciais != null)
+                {
+                    Resultado = evento.DadosParciais;
+                }
+                
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Mensagem = "Erro: " + ex.Message;
+        }
+        finally
+        {
+            Calculando = false;
+        }
+    }
+}

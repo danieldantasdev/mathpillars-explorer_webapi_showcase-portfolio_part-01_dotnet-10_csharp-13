@@ -1,0 +1,143 @@
+@startuml 02-diagrama-classes
+skinparam classAttributeIconSize 0
+skinparam classFontSize 13
+skinparam class {
+    BackgroundColor #F0F8FF
+    BorderColor #2C3E50
+    ArrowColor #2C3E50
+}
+
+namespace MathPillars.Api.Compartilhado.Primitivos {
+    class Vetor {
+        + Dimensoes : int
+        + Componentes : double[]
+        + Norma() : double
+        + Normalizar() : Vetor
+        + ProdutoEscalarCom(outro: Vetor) : double
+    }
+
+    class Matriz {
+        + Linhas : int
+        + Colunas : int
+        + Elementos : double[,]
+        + Transposta() : Matriz
+        + MultiplicarPor(outra: Matriz) : Matriz
+        + EhQuadrada() : bool
+    }
+
+    class Escalar {
+        + Valor : double
+        + ParaString() : string
+    }
+
+    class ResultadoSSE<T> {
+        + ProgressoPercentual : int
+        + MensagemProgresso : string
+        + DadosParciais : T?
+        + Concluido : bool
+    }
+}
+
+namespace MathPillars.Api.Modulos.AlgebraLinear {
+    class ProdutoEscalarServico {
+        + CalcularProdutoEscalar(vetorA: Vetor, vetorB: Vetor) : Escalar
+        + CalcularProjecao(vetorA: Vetor, vetorB: Vetor) : Vetor
+    }
+
+    class SimilaridadeCossenoServico {
+        + CalcularSimilaridade(vetorA: Vetor, vetorB: Vetor) : Escalar
+        + CalcularAngulo(vetorA: Vetor, vetorB: Vetor) : Escalar
+    }
+
+    class SVDServico {
+        + DecomporComStreamingSSE(matriz: Matriz) : IAsyncEnumerable<ResultadoSSE<ResultadoSVD>>
+    }
+
+    class PCAServico {
+        + ReduzirDimensionalidadeComStreamingSSE(pontos: Vetor[], numeroDimensoesAlvo: int) : IAsyncEnumerable<ResultadoSSE<ResultadoPCA>>
+    }
+
+    class AutovetoresServico {
+        + CalcularAutovetoresEAutovalores(matriz: Matriz) : ResultadoAutovetores
+    }
+
+    class ResultadoSVD {
+        + MatrizU : Matriz
+        + MatrizSigma : Matriz
+        + MatrizVTransposta : Matriz
+        + ValoresSingulares : double[]
+    }
+
+    class ResultadoPCA {
+        + ComponentesPrincipais : Vetor[]
+        + VarianciaExplicada : double[]
+        + PontosReduzidos : Vetor[]
+    }
+
+    class ResultadoAutovetores {
+        + Autovetores : Vetor[]
+        + Autovalores : double[]
+    }
+
+    class AlgebraLinearControlador {
+        - produtoEscalarServico : ProdutoEscalarServico
+        - similaridadeCossenoServico : SimilaridadeCossenoServico
+        - svdServico : SVDServico
+        - pcaServico : PCAServico
+        - autovetoresServico : AutovetoresServico
+        + PostCalcularProdutoEscalar(requisicao: RequisicaoProdutoEscalar) : Escalar
+        + PostCalcularSimilaridadeCosseno(requisicao: RequisicaoSimilaridade) : Escalar
+        + GetDecomporSVDComStreaming(requisicao: RequisicaoSVD) : IAsyncEnumerable<ResultadoSSE<ResultadoSVD>>
+        + GetReduzirPCAComStreaming(requisicao: RequisicaoPCA) : IAsyncEnumerable<ResultadoSSE<ResultadoPCA>>
+        + PostCalcularAutovetores(requisicao: RequisicaoAutovetores) : ResultadoAutovetores
+    }
+}
+
+namespace MathPillars.Api.Modulos.CalculoMultivariavel {
+    class GradienteServico {
+        + CalcularGradiente(funcao: FuncaoParametrica, ponto: Vetor) : Vetor
+    }
+
+    class JacobianaServico {
+        + CalcularMatrizJacobiana(funcoes: FuncaoParametrica[], ponto: Vetor) : Matriz
+    }
+
+    class LossLandscapeServico {
+        + GerarSuperficieComStreamingSSE(configuracao: ConfiguracaoLossLandscape) : IAsyncEnumerable<ResultadoSSE<PontoSuperficie3D[]>>
+    }
+
+    class ComparadorOtimizadoresServico {
+        + CompararAdamWESophiaComStreamingSSE(configuracao: ConfiguracaoOtimizadores) : IAsyncEnumerable<ResultadoSSE<ResultadoComparacaoOtimizadores>>
+    }
+}
+
+namespace MathPillars.Api.Modulos.Probabilidade {
+    class BayesServico {
+        + CalcularPosterior(prior: double, verossimilhanca: double, evidencia: double) : ResultadoBayes
+    }
+
+    class GaussianaServico {
+        + AjustarCurvaComStreamingSSE(pontos: double[], media: double, desvioPadrao: double) : IAsyncEnumerable<ResultadoSSE<PontoGaussiana[]>>
+    }
+
+    class EntropiaCruzadaServico {
+        + CalcularEntropiaCruzada(distribuicaoP: double[], distribuicaoQ: double[]) : ResultadoEntropiaCruzada
+    }
+}
+
+MathPillars.Api.Modulos.AlgebraLinear.AlgebraLinearControlador --> MathPillars.Api.Modulos.AlgebraLinear.ProdutoEscalarServico
+MathPillars.Api.Modulos.AlgebraLinear.AlgebraLinearControlador --> MathPillars.Api.Modulos.AlgebraLinear.SimilaridadeCossenoServico
+MathPillars.Api.Modulos.AlgebraLinear.AlgebraLinearControlador --> MathPillars.Api.Modulos.AlgebraLinear.SVDServico
+MathPillars.Api.Modulos.AlgebraLinear.AlgebraLinearControlador --> MathPillars.Api.Modulos.AlgebraLinear.PCAServico
+MathPillars.Api.Modulos.AlgebraLinear.AlgebraLinearControlador --> MathPillars.Api.Modulos.AlgebraLinear.AutovetoresServico
+
+MathPillars.Api.Modulos.AlgebraLinear.SVDServico ..> MathPillars.Api.Compartilhado.Primitivos.ResultadoSSE
+MathPillars.Api.Modulos.AlgebraLinear.PCAServico ..> MathPillars.Api.Compartilhado.Primitivos.ResultadoSSE
+MathPillars.Api.Modulos.CalculoMultivariavel.LossLandscapeServico ..> MathPillars.Api.Compartilhado.Primitivos.ResultadoSSE
+MathPillars.Api.Modulos.Probabilidade.GaussianaServico ..> MathPillars.Api.Compartilhado.Primitivos.ResultadoSSE
+
+MathPillars.Api.Compartilhado.Primitivos.Vetor --> MathPillars.Api.Compartilhado.Primitivos.Escalar
+MathPillars.Api.Modulos.AlgebraLinear.ResultadoSVD --> MathPillars.Api.Compartilhado.Primitivos.Matriz
+MathPillars.Api.Modulos.AlgebraLinear.ResultadoPCA --> MathPillars.Api.Compartilhado.Primitivos.Vetor
+
+@enduml

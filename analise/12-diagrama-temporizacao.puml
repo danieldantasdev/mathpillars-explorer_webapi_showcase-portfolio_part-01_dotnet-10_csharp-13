@@ -1,0 +1,58 @@
+@startuml 12-diagrama-temporizacao
+skinparam backgroundColor #FAFAFA
+
+robust "Interface Blazor WASM" as ui
+robust "ClienteMathCore" as cliente
+robust "Conexao SSE" as conexao
+robust "SVDServico (API)" as servico
+robust "Barra de Progresso" as progressoBarra
+
+@0
+ui is Ocioso
+cliente is Inativo
+conexao is Fechada
+servico is Aguardando
+progressoBarra is Oculta
+
+@100
+ui is ColetandoParametros
+
+@300
+ui is Submetendo
+cliente is Iniciando
+
+@400
+conexao is Abrindo
+
+@500
+conexao is Aberta
+servico is Calculando
+progressoBarra is Visivel
+
+@700
+progressoBarra is "0%"
+
+@1200
+progressoBarra is "33%"
+
+@1800
+progressoBarra is "66%"
+
+@2400
+progressoBarra is "100%"
+servico is Concluido
+conexao is Fechada
+
+@2500
+ui is RenderizandoResultado
+cliente is Processando
+
+@2700
+ui is ExibindoResultado
+cliente is Inativo
+progressoBarra is Oculta
+
+@3000
+ui is Ocioso
+
+@enduml

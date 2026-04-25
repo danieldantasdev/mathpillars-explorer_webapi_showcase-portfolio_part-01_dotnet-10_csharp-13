@@ -1,0 +1,75 @@
+@startuml 11-diagrama-estrutura-composta
+skinparam component {
+    BackgroundColor #F0F8FF
+    BorderColor #2C3E50
+    ArrowColor #2C3E50
+}
+
+component "MathPillars.Api" as apiPrincipal {
+
+    component "AlgebraLinearControlador" as ctrlAlgebra {
+        port "POST /produto-escalar" as portProduto
+        port "POST /similaridade-cosseno" as portCosseno
+        port "GET /svd/stream" as portSVD
+        port "GET /pca/stream" as portPCA
+    }
+
+    component "CalculoControlador" as ctrlCalculo {
+        port "POST /gradiente" as portGrad
+        port "GET /loss-landscape/stream" as portLoss
+        port "GET /otimizador/comparar/stream" as portOtim
+    }
+
+    component "ProbabilidadeControlador" as ctrlProb {
+        port "POST /bayes" as portBayes
+        port "GET /gaussiana/stream" as portGauss
+        port "POST /entropia-cruzada" as portEntropia
+    }
+
+    component "Nucleo Matematico" as nucleoMat {
+        component "ProdutoEscalarServico" as svcProd
+        component "SimilaridadeCossenoServico" as svcCos
+        component "SVDServico" as svcSVD
+        component "PCAServico" as svcPCA
+        component "AutovetoresServico" as svcAut
+        component "GradienteServico" as svcGrad
+        component "JacobianaServico" as svcJac
+        component "LossLandscapeServico" as svcLoss
+        component "ComparadorOtimizadoresServico" as svcOtim
+        component "BayesServico" as svcBayes
+        component "GaussianaServico" as svcGauss
+        component "EntropiaCruzadaServico" as svcEnt
+    }
+
+    component "Primitivos Compartilhados" as primitivos {
+        component "Vetor" as cVetor
+        component "Matriz" as cMatriz
+        component "Escalar" as cEscalar
+        component "ResultadoSSE<T>" as cResultadoSSE
+    }
+
+    portProduto --> svcProd
+    portCosseno --> svcCos
+    portSVD --> svcSVD
+    portPCA --> svcPCA
+    portGrad --> svcGrad
+    portLoss --> svcLoss
+    portOtim --> svcOtim
+    portBayes --> svcBayes
+    portGauss --> svcGauss
+    portEntropia --> svcEnt
+
+    svcSVD --> cResultadoSSE
+    svcPCA --> cResultadoSSE
+    svcLoss --> cResultadoSSE
+    svcGauss --> cResultadoSSE
+
+    svcProd --> cVetor
+    svcCos --> cVetor
+    svcSVD --> cMatriz
+    svcPCA --> cVetor
+    svcGrad --> cVetor
+    svcJac --> cMatriz
+}
+
+@enduml

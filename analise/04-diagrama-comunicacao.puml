@@ -1,0 +1,28 @@
+@startuml 04-diagrama-comunicacao
+skinparam backgroundColor #FAFAFA
+skinparam sequence {
+    BackgroundColor #F0F8FF
+    BorderColor #2C3E50
+}
+
+object "ExperimentoSVD\n(Blazor WASM)" as experimentoSVD
+object "ClienteMathCore\n(Servico)" as clienteMathCore
+object "LeitorSSE\n(Servico)" as leitorSSE
+object "ProgressoSSE\n(Componente)" as progressoSSE
+object "PainelTeoria\n(Componente)" as painelTeoria
+object "GraficoPlotly3D\n(Componente)" as graficoPlotly
+object "AlgebraLinearControlador\n(API)" as controlador
+object "SVDServico\n(MathCore)" as svdServico
+
+experimentoSVD "1: IniciarStreamSVDAsync(matriz)" --> clienteMathCore
+clienteMathCore "2: GET /api/algebra-linear/svd/stream" --> controlador
+controlador "3: DecomporComStreamingSSE(matriz)" --> svdServico
+svdServico "4: ResultadoSSE<T> stream" --> controlador
+controlador "5: data: evento SSE" --> clienteMathCore
+clienteMathCore "6: ProcessarEventoSSE(evento)" --> leitorSSE
+leitorSSE "7: AtualizarProgresso(percentual)" --> progressoSSE
+leitorSSE "8: NotificarConclusao(resultado)" --> experimentoSVD
+experimentoSVD "9: RenderizarFormulas(latex)" --> painelTeoria
+experimentoSVD "10: RenderizarGrafico3D(dados)" --> graficoPlotly
+
+@enduml

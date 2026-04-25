@@ -1,0 +1,88 @@
+@startuml 10-diagrama-objetos
+skinparam object {
+    BackgroundColor #F0F8FF
+    BorderColor #2C3E50
+    ArrowColor #2C3E50
+}
+
+object "requisicaoSVD : RequisicaoSVD" as reqSVD {
+    Linhas = 3
+    Colunas = 3
+    Elementos = [[1,2,3],[4,5,6],[7,8,9]]
+}
+
+object "matrizEntrada : Matriz" as matrizEntrada {
+    Linhas = 3
+    Colunas = 3
+    Elementos = [[1,2,3],[4,5,6],[7,8,9]]
+    EhQuadrada = true
+}
+
+object "progressoInicial : ResultadoSSE<ResultadoSVD>" as progressoInicial {
+    ProgressoPercentual = 0
+    MensagemProgresso = "Iniciando decomposicao..."
+    DadosParciais = null
+    Concluido = false
+}
+
+object "progressoIntermediario : ResultadoSSE<ResultadoSVD>" as progressoMeio {
+    ProgressoPercentual = 50
+    MensagemProgresso = "Calculando valores singulares..."
+    DadosParciais = null
+    Concluido = false
+}
+
+object "resultadoFinal : ResultadoSSE<ResultadoSVD>" as resultadoFinal {
+    ProgressoPercentual = 100
+    MensagemProgresso = "Decomposicao concluida."
+    Concluido = true
+}
+
+object "dadosSVD : ResultadoSVD" as dadosSVD {
+    ValoresSingulares = [16.118, 1.176, 0.000]
+}
+
+object "matrizU : Matriz" as matrizU {
+    Linhas = 3
+    Colunas = 3
+}
+
+object "matrizSigma : Matriz" as matrizSigma {
+    Linhas = 3
+    Colunas = 3
+}
+
+object "matrizVTransposta : Matriz" as matrizVT {
+    Linhas = 3
+    Colunas = 3
+}
+
+object "similaridade : Escalar" as escalarSimilaridade {
+    Valor = 0.9746
+}
+
+object "vetorA : Vetor" as vetorA {
+    Dimensoes = 3
+    Componentes = [1.0, 2.0, 3.0]
+    Norma = 3.7417
+}
+
+object "vetorB : Vetor" as vetorB {
+    Dimensoes = 3
+    Componentes = [4.0, 5.0, 6.0]
+    Norma = 8.7750
+}
+
+reqSVD --> matrizEntrada : produz
+matrizEntrada --> progressoInicial : inicia calculo
+progressoInicial --> progressoMeio : evolui
+progressoMeio --> resultadoFinal : conclui
+resultadoFinal --> dadosSVD : contem
+dadosSVD --> matrizU : compoe
+dadosSVD --> matrizSigma : compoe
+dadosSVD --> matrizVT : compoe
+
+vetorA --> escalarSimilaridade : similaridade com
+vetorB --> escalarSimilaridade : similaridade com
+
+@enduml

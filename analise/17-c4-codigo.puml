@@ -1,0 +1,58 @@
+@startuml 17-c4-codigo
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Code.puml
+
+title Diagrama C4 — Codigo: SVDServico (Algebra Linear)
+
+class "SVDServico" as svdServico <<C# Service>> {
+    - _limiteDimensaoMaxima : int
+    + DecomporComStreamingSSE(matriz: Matriz) : IAsyncEnumerable<ResultadoSSE<ResultadoSVD>>
+    - ValidarDimensoesMatriz(matriz: Matriz) : void
+    - ConverterParaMatrizMathNet(matriz: Matriz) : Matrix<double>
+    - ConverterDeMatrizMathNet(matrizMathNet: Matrix<double>) : Matriz
+    - EmitirProgressoInicial() : ResultadoSSE<ResultadoSVD>
+    - EmitirProgressoParcial(percentual: int, mensagem: string) : ResultadoSSE<ResultadoSVD>
+    - EmitirResultadoFinal(svd: Svd<double>) : ResultadoSSE<ResultadoSVD>
+}
+
+class "Matriz" as matriz <<C# Record>> {
+    + Linhas : int
+    + Colunas : int
+    + Elementos : double[,]
+    + EhQuadrada() : bool
+    + Transposta() : Matriz
+}
+
+class "ResultadoSSE<T>" as resultadoSSE <<C# Record>> {
+    + ProgressoPercentual : int
+    + MensagemProgresso : string
+    + DadosParciais : T?
+    + Concluido : bool
+}
+
+class "ResultadoSVD" as resultadoSVD <<C# Record>> {
+    + MatrizU : Matriz
+    + MatrizSigma : Matriz
+    + MatrizVTransposta : Matriz
+    + ValoresSingulares : double[]
+}
+
+class "AlgebraLinearControlador" as controlador <<ASP.NET Core Controller>> {
+    - _svdServico : SVDServico
+    + GetDecomporSVDComStreaming(requisicao: RequisicaoSVD) : IAsyncEnumerable<ResultadoSSE<ResultadoSVD>>
+}
+
+class "Svd<double>" as mathnetSvd <<MathNet.Numerics>> {
+    + U : Matrix<double>
+    + S : Vector<double>
+    + VT : Matrix<double>
+    + Compute(matrix: Matrix<double>) : Svd<double>
+}
+
+controlador --> svdServico : instancia e delega
+svdServico --> matriz : recebe como parametro
+svdServico --> resultadoSSE : emite via IAsyncEnumerable
+resultadoSSE --> resultadoSVD : encapsula como DadosParciais
+svdServico --> mathnetSvd : delega calculo numerico
+mathnetSvd ..> resultadoSVD : dados convertidos para
+
+@enduml

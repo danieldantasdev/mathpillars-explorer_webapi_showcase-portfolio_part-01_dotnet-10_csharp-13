@@ -1,0 +1,131 @@
+@startuml 07-diagrama-componentes
+skinparam component {
+    BackgroundColor #F0F8FF
+    BorderColor #2C3E50
+    ArrowColor #2C3E50
+}
+skinparam interface {
+    BackgroundColor #FFFACD
+    BorderColor #2C3E50
+}
+
+package "MathPillars.Web (Blazor WASM)" {
+    package "Paginas" {
+        [Inicio] as inicio
+        [AlgebraLinearPagina] as paginaAlgebra
+        [CalculoPagina] as paginaCalculo
+        [ProbabilidadePagina] as paginaProbabilidade
+
+        package "Experimentos Algebra Linear" {
+            [ExperimentoProdutoEscalar] as expProduto
+            [ExperimentoSimilaridadeCosseno] as expCosseno
+            [ExperimentoSVD] as expSVD
+            [ExperimentoPCA] as expPCA
+        }
+
+        package "Experimentos Calculo" {
+            [ExperimentoLossLandscape] as expLoss
+            [ExperimentoOtimizadores] as expOtim
+            [ExperimentoBackpropagation] as expBack
+        }
+
+        package "Experimentos Probabilidade" {
+            [ExperimentoBayes] as expBayes
+            [ExperimentoGaussiana] as expGauss
+            [ExperimentoEntropiaCruzada] as expEntropia
+        }
+    }
+
+    package "Componentes Compartilhados" {
+        [PainelTeoria] as painelTeoria
+        [PainelParametros] as painelParametros
+        [ProgressoSSE] as progressoSSE
+        [GraficoPlotly3D] as plotly
+        [GraficoScottPlot2D] as scottplot
+    }
+
+    package "Servicos" {
+        [ClienteMathCore] as clienteMath
+        [LeitorSSE] as leitorSSE
+    }
+}
+
+interface "IApiAlgebraLinear" as iAlgebra
+interface "IApiCalculo" as iCalculo
+interface "IApiProbabilidade" as iProbabilidade
+
+package "MathPillars.Api (ASP.NET Core)" {
+    package "Modulo Algebra Linear" {
+        [AlgebraLinearControlador] as ctrlAlgebra
+        [ProdutoEscalarServico] as svcProduto
+        [SimilaridadeCossenoServico] as svcCosseno
+        [SVDServico] as svcSVD
+        [PCAServico] as svcPCA
+        [AutovetoresServico] as svcAutovet
+    }
+
+    package "Modulo Calculo Multivariavel" {
+        [CalculoControlador] as ctrlCalculo
+        [GradienteServico] as svcGrad
+        [JacobianaServico] as svcJacob
+        [LossLandscapeServico] as svcLoss
+        [ComparadorOtimizadoresServico] as svcOtim
+    }
+
+    package "Modulo Probabilidade" {
+        [ProbabilidadeControlador] as ctrlProb
+        [BayesServico] as svcBayes
+        [GaussianaServico] as svcGauss
+        [EntropiaCruzadaServico] as svcEntropia
+    }
+
+    package "Compartilhado" {
+        [Vetor] as vetor
+        [Matriz] as matriz
+        [Escalar] as escalar
+        [ResultadoSSE] as resultadoSSE
+    }
+}
+
+package "Biblioteca Externa" {
+    [MathNet.Numerics] as mathnet
+}
+
+clienteMath --> iAlgebra
+clienteMath --> iCalculo
+clienteMath --> iProbabilidade
+
+iAlgebra --> ctrlAlgebra
+iCalculo --> ctrlCalculo
+iProbabilidade --> ctrlProb
+
+ctrlAlgebra --> svcProduto
+ctrlAlgebra --> svcCosseno
+ctrlAlgebra --> svcSVD
+ctrlAlgebra --> svcPCA
+ctrlAlgebra --> svcAutovet
+
+ctrlCalculo --> svcGrad
+ctrlCalculo --> svcJacob
+ctrlCalculo --> svcLoss
+ctrlCalculo --> svcOtim
+
+ctrlProb --> svcBayes
+ctrlProb --> svcGauss
+ctrlProb --> svcEntropia
+
+svcSVD --> mathnet
+svcPCA --> mathnet
+svcGrad --> mathnet
+svcBayes --> mathnet
+svcGauss --> mathnet
+
+svcSVD ..> resultadoSSE
+svcPCA ..> resultadoSSE
+svcLoss ..> resultadoSSE
+svcGauss ..> resultadoSSE
+
+leitorSSE --> progressoSSE
+clienteMath --> leitorSSE
+
+@enduml

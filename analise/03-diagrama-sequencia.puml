@@ -1,0 +1,60 @@
+@startuml 03-diagrama-sequencia
+skinparam sequenceArrowThickness 2
+skinparam sequenceParticipant underline
+skinparam sequence {
+    BackgroundColor #F0F8FF
+    BorderColor #2C3E50
+    ArrowColor #2C3E50
+    LifeLineBorderColor #2C3E50
+}
+
+actor "Usuario" as usuario
+participant "ExperimentoSVD\n(Blazor WASM)" as pagina
+participant "ProgressoSSE\n(Componente)" as progressoSSE
+participant "ClienteMathCore\n(Servico)" as cliente
+participant "LeitorSSE\n(Servico)" as leitorSSE
+participant "AlgebraLinearControlador\n(ASP.NET Core)" as controlador
+participant "SVDServico\n(MathCore)" as svdServico
+
+== Inicio do Experimento ==
+
+usuario -> pagina : Insere matriz e clica em "Executar SVD"
+pagina -> progressoSSE : ExibirCarregando()
+pagina -> cliente : IniciarStreamSVDAsync(matriz)
+cliente -> controlador : GET /api/algebra-linear/svd/stream\n[Content-Type: text/event-stream]
+controlador -> svdServico : DecomporComStreamingSSE(matriz)
+activate svdServico
+
+== Streaming SSE — Progresso em Tempo Real ==
+
+svdServico --> controlador : ResultadoSSE { Progresso: 0%, Mensagem: "Iniciando decomposicao..." }
+controlador --> cliente : data: { progressoPercentual: 0, concluido: false }
+cliente -> leitorSSE : ProcessarEventoSSE(evento)
+leitorSSE --> progressoSSE : AtualizarProgresso(0%)
+progressoSSE --> pagina : RenderizarBarraProgresso(0%)
+
+svdServico --> controlador : ResultadoSSE { Progresso: 33%, Mensagem: "Calculando matriz U..." }
+controlador --> cliente : data: { progressoPercentual: 33, concluido: false }
+cliente -> leitorSSE : ProcessarEventoSSE(evento)
+leitorSSE --> progressoSSE : AtualizarProgresso(33%)
+
+svdServico --> controlador : ResultadoSSE { Progresso: 66%, Mensagem: "Calculando valores singulares..." }
+controlador --> cliente : data: { progressoPercentual: 66, concluido: false }
+cliente -> leitorSSE : ProcessarEventoSSE(evento)
+leitorSSE --> progressoSSE : AtualizarProgresso(66%)
+
+svdServico --> controlador : ResultadoSSE { Progresso: 100%, DadosParciais: ResultadoSVD, Concluido: true }
+deactivate svdServico
+controlador --> cliente : data: { progressoPercentual: 100, dadosParciais: {...}, concluido: true }
+cliente -> leitorSSE : ProcessarEventoSSE(evento)
+
+== Renderizacao do Resultado ==
+
+leitorSSE --> pagina : NotificarConclusao(resultadoSVD)
+pagina -> progressoSSE : OcultarCarregando()
+pagina -> pagina : RenderizarMatrizU(resultadoSVD.MatrizU)
+pagina -> pagina : RenderizarValoresSingulares(resultadoSVD.ValoresSingulares)
+pagina -> pagina : RenderizarFormalizacaoLatex("A = U\\Sigma V^T")
+pagina --> usuario : Exibe resultado completo com graficos e formalizacao
+
+@enduml

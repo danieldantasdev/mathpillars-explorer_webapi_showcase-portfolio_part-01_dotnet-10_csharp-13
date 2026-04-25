@@ -1,0 +1,68 @@
+@startuml 16-c4-componente
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+title Diagrama C4 — Componente: MathPillars.Api
+
+Container_Ext(webApp, "MathPillars.Web", "Blazor WASM", "Frontend interativo")
+
+Container_Boundary(api, "MathPillars.Api") {
+
+    Component(ctrlAlgebra, "AlgebraLinearControlador", "ASP.NET Core Controller", "Recebe requisicoes de algebra linear. Delega para servicos especializados. Suporta endpoints REST e SSE.")
+
+    Component(ctrlCalculo, "CalculoControlador", "ASP.NET Core Controller", "Recebe requisicoes de calculo multivariavel. Gerencia streaming SSE para Loss Landscape e comparacao de otimizadores.")
+
+    Component(ctrlProb, "ProbabilidadeControlador", "ASP.NET Core Controller", "Recebe requisicoes de probabilidade e estatistica. Gerencia streaming SSE para ajuste de curvas gaussianas.")
+
+    Component(svcProduto, "ProdutoEscalarServico", "C# Service", "Calcula produto escalar e projecao vetorial.")
+    Component(svcCosseno, "SimilaridadeCossenoServico", "C# Service", "Calcula similaridade de cosseno e angulo entre vetores.")
+    Component(svcSVD, "SVDServico", "C# Service + SSE", "Executa decomposicao SVD via MathNet.Numerics com streaming de progresso.")
+    Component(svcPCA, "PCAServico", "C# Service + SSE", "Executa reducao de dimensionalidade PCA com streaming de progresso.")
+    Component(svcAutovet, "AutovetoresServico", "C# Service", "Calcula autovetores e autovalores de matrizes quadradas.")
+
+    Component(svcGrad, "GradienteServico", "C# Service", "Calcula gradiente de funcoes parametricas por diferenciacao numerica.")
+    Component(svcJacob, "JacobianaServico", "C# Service", "Calcula matriz Jacobiana de sistemas de funcoes.")
+    Component(svcLoss, "LossLandscapeServico", "C# Service + SSE", "Gera superficies 3D de funcoes de perda com streaming de progresso.")
+    Component(svcOtim, "ComparadorOtimizadoresServico", "C# Service + SSE", "Simula e compara trajetorias dos otimizadores AdamW e Sophia.")
+
+    Component(svcBayes, "BayesServico", "C# Service", "Aplica o Teorema de Bayes calculando posterior a partir de prior e verossimilhanca.")
+    Component(svcGauss, "GaussianaServico", "C# Service + SSE", "Gera e ajusta curvas de distribuicao gaussiana com streaming.")
+    Component(svcEnt, "EntropiaCruzadaServico", "C# Service", "Calcula entropia de Shannon e Cross-Entropy entre distribuicoes.")
+
+    Component(primitivos, "Primitivos Compartilhados", "C# Records/Classes", "Vetor, Matriz, Escalar e ResultadoSSE<T> utilizados por todos os modulos.")
+}
+
+System_Ext(mathnet, "MathNet.Numerics", "Biblioteca numerica .NET")
+
+Rel(webApp, ctrlAlgebra, "REST / SSE", "HTTPS")
+Rel(webApp, ctrlCalculo, "REST / SSE", "HTTPS")
+Rel(webApp, ctrlProb, "REST / SSE", "HTTPS")
+
+Rel(ctrlAlgebra, svcProduto, "Delega calculo")
+Rel(ctrlAlgebra, svcCosseno, "Delega calculo")
+Rel(ctrlAlgebra, svcSVD, "Delega calculo SSE")
+Rel(ctrlAlgebra, svcPCA, "Delega calculo SSE")
+Rel(ctrlAlgebra, svcAutovet, "Delega calculo")
+
+Rel(ctrlCalculo, svcGrad, "Delega calculo")
+Rel(ctrlCalculo, svcJacob, "Delega calculo")
+Rel(ctrlCalculo, svcLoss, "Delega calculo SSE")
+Rel(ctrlCalculo, svcOtim, "Delega calculo SSE")
+
+Rel(ctrlProb, svcBayes, "Delega calculo")
+Rel(ctrlProb, svcGauss, "Delega calculo SSE")
+Rel(ctrlProb, svcEnt, "Delega calculo")
+
+Rel(svcSVD, mathnet, "SVD, eigendecomp")
+Rel(svcPCA, mathnet, "PCA, covariancia")
+Rel(svcGrad, mathnet, "Diferenciacao numerica")
+Rel(svcGauss, mathnet, "Distribuicao normal")
+Rel(svcBayes, mathnet, "Probabilidade")
+
+Rel(svcSVD, primitivos, "Usa ResultadoSSE<T>")
+Rel(svcPCA, primitivos, "Usa Vetor, ResultadoSSE<T>")
+Rel(svcGrad, primitivos, "Usa Vetor")
+Rel(svcLoss, primitivos, "Usa ResultadoSSE<T>")
+
+@enduml

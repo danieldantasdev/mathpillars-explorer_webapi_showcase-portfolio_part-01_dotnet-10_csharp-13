@@ -1,0 +1,77 @@
+@startuml 05-diagrama-estados
+skinparam state {
+    BackgroundColor #F0F8FF
+    BorderColor #2C3E50
+    ArrowColor #2C3E50
+    StartColor #2C3E50
+    EndColor #2C3E50
+}
+
+[*] --> Ocioso : Pagina carregada
+
+state Ocioso {
+    Ocioso : Aguardando parametros do usuario
+    Ocioso : Formulario vazio e editavel
+}
+
+Ocioso --> Validando : Usuario submete parametros
+
+state Validando {
+    Validando : Verificando limites de entrada
+    Validando : Matriz <= 1000x1000
+    Validando : Dataset <= 10.000 pontos
+}
+
+Validando --> Calculando : Parametros validos
+Validando --> ErroValidacao : Parametros invalidos
+
+state ErroValidacao {
+    ErroValidacao : Exibindo mensagem de erro
+    ErroValidacao : Campos invalidos destacados
+}
+
+ErroValidacao --> Ocioso : Usuario corrige parametros
+
+state Calculando {
+    Calculando : Requisicao SSE ativa
+    Calculando : Progresso exibido em tempo real
+    Calculando : UI responsiva (nao bloqueada)
+
+    state "Transmitindo Progresso" as transmitindo {
+        [*] --> AguardandoEvento
+        AguardandoEvento --> ProcessandoEvento : Evento SSE recebido
+        ProcessandoEvento --> AtualizandoUI : Progresso extraido
+        AtualizandoUI --> AguardandoEvento : UI atualizada
+        AguardandoEvento --> [*] : Evento de conclusao recebido
+    }
+}
+
+Calculando --> Concluido : Calculo finalizado com sucesso
+Calculando --> ErroComunicacao : Falha na conexao SSE
+Calculando --> Cancelado : Usuario cancela operacao
+
+state ErroComunicacao {
+    ErroComunicacao : Exibindo mensagem de falha
+    ErroComunicacao : Opcao de tentar novamente
+}
+
+ErroComunicacao --> Ocioso : Usuario clica em tentar novamente
+
+state Cancelado {
+    Cancelado : Requisicao SSE encerrada
+    Cancelado : Estado parcial descartado
+}
+
+Cancelado --> Ocioso : Estado reiniciado
+
+state Concluido {
+    Concluido : Resultado matematico exibido
+    Concluido : Graficos renderizados
+    Concluido : Formalizacao LaTeX apresentada
+    Concluido : Parametros ainda editaveis
+}
+
+Concluido --> Ocioso : Usuario modifica parametros e reinicia
+Concluido --> [*] : Usuario navega para outro modulo
+
+@enduml

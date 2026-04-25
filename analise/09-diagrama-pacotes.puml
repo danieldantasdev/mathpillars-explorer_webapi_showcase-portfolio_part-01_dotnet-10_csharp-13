@@ -1,0 +1,118 @@
+@startuml 09-diagrama-pacotes
+skinparam package {
+    BackgroundColor #F0F8FF
+    BorderColor #2C3E50
+    ArrowColor #2C3E50
+}
+skinparam class {
+    BackgroundColor #FFFACD
+    BorderColor #2C3E50
+}
+
+package "MathPillars.Api" {
+
+    package "MathPillars.Api.Compartilhado" {
+        package "MathPillars.Api.Compartilhado.Primitivos" {
+            class Vetor
+            class Matriz
+            class Escalar
+            class "ResultadoSSE<T>"
+        }
+    }
+
+    package "MathPillars.Api.Modulos" {
+
+        package "MathPillars.Api.Modulos.AlgebraLinear" {
+            class AlgebraLinearControlador
+            class ProdutoEscalarServico
+            class SimilaridadeCossenoServico
+            class SVDServico
+            class PCAServico
+            class AutovetoresServico
+            class ResultadoSVD
+            class ResultadoPCA
+            class ResultadoAutovetores
+        }
+
+        package "MathPillars.Api.Modulos.CalculoMultivariavel" {
+            class CalculoControlador
+            class GradienteServico
+            class JacobianaServico
+            class LossLandscapeServico
+            class ComparadorOtimizadoresServico
+            class PontoSuperficie3D
+            class ResultadoComparacaoOtimizadores
+        }
+
+        package "MathPillars.Api.Modulos.Probabilidade" {
+            class ProbabilidadeControlador
+            class BayesServico
+            class GaussianaServico
+            class EntropiaCruzadaServico
+            class ResultadoBayes
+            class PontoGaussiana
+            class ResultadoEntropiaCruzada
+        }
+    }
+}
+
+package "MathPillars.Web" {
+
+    package "MathPillars.Web.Servicos" {
+        class ClienteMathCore
+        class LeitorSSE
+    }
+
+    package "MathPillars.Web.Componentes" {
+        class PainelTeoria
+        class PainelParametros
+        class ProgressoSSE
+        class GraficoPlotly3D
+        class GraficoScottPlot2D
+    }
+
+    package "MathPillars.Web.Paginas" {
+        package "MathPillars.Web.Paginas.AlgebraLinear" {
+            class AlgebraLinearPagina
+            class ExperimentoProdutoEscalar
+            class ExperimentoSimilaridadeCosseno
+            class ExperimentoSVD
+            class ExperimentoPCA
+        }
+        package "MathPillars.Web.Paginas.CalculoMultivariavel" {
+            class CalculoPagina
+            class ExperimentoLossLandscape
+            class ExperimentoOtimizadores
+            class ExperimentoBackpropagation
+        }
+        package "MathPillars.Web.Paginas.Probabilidade" {
+            class ProbabilidadePagina
+            class ExperimentoBayes
+            class ExperimentoGaussiana
+            class ExperimentoEntropiaCruzada
+        }
+    }
+}
+
+package "MathPillars.Testes" {
+    package "MathPillars.Testes.AlgebraLinear" {
+        class ProdutoEscalarServicoTestes
+        class SimilaridadeCossenoServicoTestes
+    }
+    package "MathPillars.Testes.CalculoMultivariavel" {
+        class GradienteServicoTestes
+    }
+    package "MathPillars.Testes.Probabilidade" {
+        class BayesServicoTestes
+    }
+}
+
+"MathPillars.Web.Servicos" ..> "MathPillars.Api.Modulos.AlgebraLinear" : HTTP
+"MathPillars.Web.Servicos" ..> "MathPillars.Api.Modulos.CalculoMultivariavel" : HTTP
+"MathPillars.Web.Servicos" ..> "MathPillars.Api.Modulos.Probabilidade" : HTTP
+"MathPillars.Testes" ..> "MathPillars.Api.Modulos.AlgebraLinear" : testa
+"MathPillars.Testes" ..> "MathPillars.Api.Modulos.CalculoMultivariavel" : testa
+"MathPillars.Testes" ..> "MathPillars.Api.Modulos.Probabilidade" : testa
+"MathPillars.Api.Modulos" ..> "MathPillars.Api.Compartilhado" : usa
+
+@enduml

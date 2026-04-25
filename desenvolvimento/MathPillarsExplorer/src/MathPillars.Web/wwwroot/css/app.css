@@ -1,0 +1,113 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --cor-fundo: #FAFBFC;
+    --cor-superficie: #FFFFFF;
+    --cor-primaria: #0066FF;
+    --cor-primaria-suave: #EBF3FF;
+    --cor-secundaria: #6E7191;
+    --cor-texto-principal: #14142B;
+    --cor-texto-secundario: #4E4B66;
+    --cor-borda: #D6D8E7;
+    --cor-sucesso: #008A5D;
+    --cor-erro: #D32F2F;
+    --sombra-suave: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --sombra-premium: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --raio-borda: 16px;
+    --fonte-principal: 'Inter', system-ui, -apple-system, sans-serif;
+    --fonte-titulo: 'Outfit', sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+}
+
+body {
+    background-color: var(--cor-fundo);
+    color: var(--cor-texto-principal);
+    font-family: var(--fonte-principal);
+    line-height: 1.5;
+}
+
+h1, h2, h3, h4 {
+    font-family: var(--fonte-titulo);
+    font-weight: 600;
+}
+
+.layout-principal {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: 100vh;
+}
+
+.barra-lateral {
+    background-color: var(--cor-superficie);
+    border-right: 1px solid var(--cor-borda);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+}
+
+.conteudo-principal {
+    padding: 3rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.cartao-premium {
+    background-color: var(--cor-superficie);
+    border-radius: var(--raio-borda);
+    padding: 2rem;
+    box-shadow: var(--sombra-suave);
+    border: 1px solid var(--cor-borda);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cartao-premium:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--sombra-premium);
+}
+
+.botao-primario {
+    background-color: var(--cor-primaria);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.botao-primario:hover {
+    opacity: 0.9;
+}
+
+.grid-experimentos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+/* Glassmorphism subtle */
+.efeito-vidro {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* KaTeX specific styling */
+.formula-matematica {
+    margin: 1.5rem 0;
+    font-size: 1.1rem;
+    color: var(--cor-primaria);
+}
